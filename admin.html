@@ -202,7 +202,7 @@
             console.log('URL:', supabaseUrl);
             console.log('KEY:', supabaseKey);
             
-            const sbClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
             
             // EmailJS 初始化
             emailjs.init('你的EmailJS_PublicKey');
