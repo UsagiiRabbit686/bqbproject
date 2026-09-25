@@ -412,36 +412,98 @@
         }
 
           // 操作函数
-            window.approveRecord = function(id) {
-                const records = getAllRegistrations();
-                const record = records.find(r => r.id === id);
-                if (record) {
-                    record.status = 'approved';
-                    record.emailStatus = 'sent';
-                    saveAllRegistrations(records);
-                    await renderAdminTable();;
-                }
-            };
-            window.rejectRecord = function(id) {
-                const records = getAllRegistrations();
-                const record = records.find(r => r.id === id);
-                if (record) {
-                    record.status = 'rejected';
-                    record.emailStatus = 'none';
-                    saveAllRegistrations(records);
-                    await renderAdminTable();;
-                }
-            };
-            window.resetRecord = function(id) {
-                const records = getAllRegistrations();
-                const record = records.find(r => r.id === id);
-                if (record) {
-                    record.status = 'pending';
-                    record.emailStatus = 'none';
-                    saveAllRegistrations(records);
-                    await renderAdminTable();;
-                }
-            };
+           window.approveRecord = async function(id) {
+               // 1. 从 Supabase 获取该条记录
+               const { data: record, error: fetchError } = await sbClient
+                   .from('registrations')
+                   .select('*')
+                   .eq('id', id)
+                   .single();
+               if (fetchError || !record) {
+        alert('记录不存在或读取失败');
+        return;
+    }
+
+    // 2. 准备 EmailJS 模板变量
+    const templateParams = {
+        to_email: record.email,
+        to_name: record.nickname,
+        group_number: '8888-6666-000'   // 替换为你的真实群号
+    };
+
+    let emailStatus = 'failed';
+
+    // 3. 发送邮件
+    try {
+        await emailjs.send(
+            '你的ServiceID',
+            '你的TemplateID',
+            templateParams
+        );
+        emailStatus = 'sent';
+        console.log('邮件发送成功:', record.email);
+    } catch (emailError) {
+        console.error('邮件发送失败:', emailError);
+    }
+
+    // 4. 更新数据库状态
+    const { error: updateError } = await sbClient
+        .from('registrations')
+        .update({
+            status: 'approved',
+            email_status: emailStatus,
+            last_edit_time: new Date().toISOString(),
+            last_edit_admin: sessionStorage.getItem('currentAdmin') || '未知'
+        })
+        .eq('id', id);
+
+    if (updateError) {
+        alert('状态更新失败：' + updateError.message);
+        return;
+    }
+
+    // 5. 刷新表格
+    await renderAdminTable();
+
+    if (emailStatus !== 'sent') {
+        alert('审核已通过，但邮件发送失败，请检查 EmailJS 配置');
+    }
+};
+           window.rejectRecord = async function(id) {
+    const { error } = await sbClient
+        .from('registrations')
+        .update({
+            status: 'rejected',
+            email_status: 'none',
+            last_edit_time: new Date().toISOString(),
+            last_edit_admin: sessionStorage.getItem('currentAdmin') || '未知'
+        })
+        .eq('id', id);
+
+    if (error) {
+        alert('操作失败：' + error.message);
+        return;
+    }
+    await renderAdminTable();
+};
+
+window.resetRecord = async function(id) {
+    const { error } = await sbClient
+        .from('registrations')
+        .update({
+            status: 'pending',
+            email_status: 'none',
+            last_edit_time: new Date().toISOString(),
+            last_edit_admin: sessionStorage.getItem('currentAdmin') || '未知'
+        })
+        .eq('id', id);
+
+    if (error) {
+        alert('操作失败：' + error.message);
+        return;
+    }
+    await renderAdminTable();
+};
 
             // 查看图片
             window.viewImage = function(src) {
