@@ -211,33 +211,29 @@
 
             // 登录逻辑
            document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
+               e.preventDefault();
+               const email = document.getElementById('adminUser').value.trim();
+               const password = document.getElementById('adminPass').value.trim();
+               const loginError = document.getElementById('loginError');
+               loginError.textContent = '';
+               try {
+                   const { data, error } = await sbClient.auth.signInWithPassword({
+                       email: email,
+                       password: password
+                   });
 
-    const email = document.getElementById('adminUser').value.trim();
-    const password = document.getElementById('adminPass').value.trim();
-    const loginError = document.getElementById('loginError');
+                   if (error) {
+                       loginError.textContent = '❌ ' + error.message;
+                       return;
+                   }
 
-    loginError.textContent = '';
-
-    try {
-        const { data, error } = await sbClient.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-
-        if (error) {
-            loginError.textContent = '❌ ' + error.message;
-            return;
-        }
-
-        // 登录成功：交给 onAuthStateChanged 处理视图切换
-        sessionStorage.setItem('adminToken', data.session.access_token);
-        sessionStorage.setItem('currentAdmin', email);
-
-    } catch (err) {
-        loginError.textContent = '❌ 无法连接服务器';
-    }
-});
+                   // 登录成功：交给 onAuthStateChanged 处理视图切换
+                   sessionStorage.setItem('adminToken', data.session.access_token);
+                   essionStorage.setItem('currentAdmin', email);
+               } catch (err) {
+                   loginError.textContent = '❌ 无法连接服务器';
+               }
+           });
 
                sessionStorage.setItem('adminToken', data.session.access_token);
                sessionStorage.setItem('currentAdmin', email);
