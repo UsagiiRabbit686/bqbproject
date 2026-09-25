@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>比奇堡小区二期入驻申请 - 管理员后台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DotGothic16&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pixel-black: #1a1a1a; --pixel-dark: #2d2d2d; --pixel-gray: #6b6b6b;
+            --pixel-light: #d4d4d4; --pixel-white: #f5f5f5; --pixel-blue: #4a90d9;
+            --pixel-blue-dark: #2d5a8f; --pixel-green: #5cb85c; --pixel-green-dark: #3d7a3d;
+            --pixel-red: #e05a5a; --pixel-red-dark: #a03d3d; --pixel-yellow: #f0c040;
+            --pixel-yellow-dark: #b8942f; --pixel-orange: #e8823a; --pixel-teal: #4aa3a3;
+            --pixel-purple: #7a5ab8; --pixel-bg-dark: #1a2a3a;
+            --pixel-border: 3px solid #1a1a1a; --pixel-shadow: 5px 5px 0 rgba(0,0,0,0.35);
+            --pixel-shadow-sm: 3px 3px 0 rgba(0,0,0,0.3);
+            --font-pixel-en: 'Press Start 2P', 'DotGothic16', monospace;
+            --font-pixel-zh: 'DotGothic16', 'Press Start 2P', 'Zpix', 'SimSun', monospace;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: var(--font-pixel-zh); background: #0d1b2a; color: var(--pixel-white); min-height:100vh; overflow-x:hidden; image-rendering:pixelated; -webkit-font-smoothing:none; user-select:none; }
+        input, textarea, select { user-select:text; -webkit-user-select:text; font-family:var(--font-pixel-zh); }
+        ::-webkit-scrollbar { width:14px; height:14px; }
+        ::-webkit-scrollbar-track { background:#1a1a1a; border:2px solid #000; }
+        ::-webkit-scrollbar-thumb { background:#6b6b6b; border:2px solid #000; box-shadow:inset 0 0 0 2px #3a3a3a; }
+
+        /* 登录界面 */
+        #loginView { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:1rem; }
+        .login-box { background:#1a2a3a; border:4px solid #1a1a1a; box-shadow:10px 10px 0 rgba(0,0,0,0.5); padding:2.5rem 2rem; max-width:400px; width:100%; text-align:center; }
+        .login-title { font-size:1.3rem; font-weight:bold; color:#ffd700; letter-spacing:2px; margin-bottom:1.5rem; text-shadow:2px 2px 0 #000; font-family:var(--font-pixel-zh); }
+        .login-box .form-group { text-align:left; margin-bottom:1.2rem; }
+        .form-label { display:block; font-size:0.85rem; font-weight:bold; letter-spacing:1px; color:#ddd; margin-bottom:0.5rem; text-shadow:1px 1px 0 #000; }
+        .pixel-input { width:100%; padding:0.8rem 1rem; background:#0d1b2a; border:3px solid #1a1a1a; color:#fff; font-size:0.9rem; font-family:var(--font-pixel-zh); letter-spacing:1px; outline:none; box-shadow:3px 3px 0 rgba(0,0,0,0.25); transition:all 0.1s; }
+        .pixel-input:focus { border-color:#ffd700; }
+        .login-error { color:#e05a5a; font-size:0.7rem; letter-spacing:1px; margin-top:0.8rem; min-height:1.2em; }
+        .pixel-btn { display:inline-block; font-family:var(--font-pixel-zh); font-size:0.8rem; font-weight:bold; letter-spacing:1px; cursor:pointer; border:3px solid #1a1a1a; box-shadow:var(--pixel-shadow-sm); padding:0.7rem 1.5rem; background:var(--pixel-blue); color:#fff; text-decoration:none; text-shadow:2px 2px 0 #1a1a1a; transition:all 0.12s; }
+        .pixel-btn:hover { background:var(--pixel-blue-dark); }
+        .pixel-btn.btn-red { background:var(--pixel-red); }
+        .pixel-btn.btn-red:hover { background:var(--pixel-red-dark); }
+        .pixel-btn.btn-sm { padding:0.5rem 1rem; font-size:0.7rem; }
+        .pixel-btn.btn-xs { padding:0.3rem 0.7rem; font-size:0.65rem; letter-spacing:1px; }
+
+        /* 后台界面 */
+        #adminView { display:none; padding:1rem; }
+        .admin-header { max-width:1400px; margin:0 auto 1.5rem auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; background:rgba(0,0,0,0.75); border:3px solid #1a1a1a; box-shadow:var(--pixel-shadow); padding:0.8rem 1.2rem; }
+        .admin-header-title { font-size:1.2rem; font-weight:bold; color:#ffd700; letter-spacing:2px; text-shadow:2px 2px 0 #000; }
+        .admin-header-info { font-size:0.7rem; color:#aaa; letter-spacing:1px; }
+        .admin-controls { display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center; }
+        .admin-toolbar { display:flex; flex-wrap:wrap; gap:0.8rem; align-items:center; background:rgba(0,0,0,0.6); border:2px solid #1a1a1a; padding:0.8rem 1rem; box-shadow:var(--pixel-shadow-sm); }
+        .admin-toolbar select, .admin-toolbar input[type="text"] { padding:0.5rem 0.8rem; background:#0d1b2a; border:2px solid #3a3a3a; color:#fff; font-size:0.75rem; font-family:var(--font-pixel-zh); outline:none; letter-spacing:1px; min-width:140px; }
+        .admin-toolbar label { font-size:0.7rem; color:#ccc; letter-spacing:1px; }
+        .admin-table-wrapper { background:rgba(0,0,0,0.6); border:3px solid #1a1a1a; box-shadow:var(--pixel-shadow); overflow-x:auto; max-width:100%; }
+        .admin-table { width:100%; border-collapse:collapse; font-size:0.7rem; letter-spacing:0.5px; min-width:1000px; }
+        .admin-table th { background:#1a2a3a; color:#ffd700; font-weight:bold; letter-spacing:1px; padding:0.7rem 0.6rem; border:2px solid #1a1a1a; text-align:left; font-size:0.65rem; text-transform:uppercase; }
+        .admin-table td { padding:0.6rem; border:2px solid #1a1a1a; color:#ccc; vertical-align:middle; font-size:0.7rem; word-break:break-word; max-width:150px; }
+        .admin-table tr:nth-child(even) { background:rgba(255,255,255,0.03); }
+        .admin-table tr:hover { background:rgba(255,255,255,0.08); }
+        .status-badge { display:inline-block; padding:0.25rem 0.6rem; font-size:0.6rem; letter-spacing:1px; border:2px solid #1a1a1a; box-shadow:1px 1px 0 rgba(0,0,0,0.3); font-weight:bold; text-transform:uppercase; white-space:nowrap; }
+        .status-badge.pending { background:var(--pixel-yellow); color:#1a1a1a; }
+        .status-badge.approved { background:var(--pixel-green); color:#fff; text-shadow:1px 1px 0 #1a1a1a; }
+        .status-badge.rejected { background:var(--pixel-red); color:#fff; text-shadow:1px 1px 0 #1a1a1a; }
+        .admin-thumb { width:45px; height:45px; object-fit:cover; border:2px solid #1a1a1a; cursor:pointer; image-rendering:pixelated; background:#0d1b2a; display:block; transition:transform 0.1s; }
+        .admin-thumb:hover { transform:scale(1.1); }
+        .btn-group-inline { display:flex; gap:0.3rem; flex-wrap:wrap; }
+        .email-status.sent { color:#5cb85c; } .email-status.failed { color:#e05a5a; } .email-status.none { color:#777; }
+        .empty-msg { text-align:center; padding:3rem 1rem; color:#666; font-size:0.9rem; letter-spacing:2px; }
+        .pixel-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:100; display:none; align-items:center; justify-content:center; }
+        .pixel-modal-overlay.show { display:flex; }
+        .pixel-modal { background:#1a2a3a; border:4px solid #1a1a1a; box-shadow:8px 8px 0 rgba(0,0,0,0.5); padding:2rem; max-width:450px; width:90%; text-align:center; position:relative; max-height:80vh; overflow-y:auto; }
+        .pixel-modal-title { font-size:1.2rem; font-weight:bold; color:#ffd700; letter-spacing:2px; margin-bottom:1rem; text-shadow:2px 2px 0 #000; }
+        .image-modal { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:200; display:none; align-items:center; justify-content:center; cursor:zoom-out; padding:2rem; }
+        .image-modal.show { display:flex; }
+        .image-modal img { max-width:90%; max-height:90%; border:4px solid #fff; box-shadow:8px 8px 0 rgba(0,0,0,0.6); image-rendering:pixelated; }
+        .history-item { padding:0.6rem; border:2px solid #1a1a1a; margin-bottom:0.5rem; background:rgba(0,0,0,0.4); font-size:0.65rem; line-height:1.5; text-align:left; }
+        .hist-time { color:#ffd700; font-weight:bold; }
+        .hist-admin { color:#aaa; }
+        .hist-detail { color:#ccc; font-size:0.6rem; }
+    </style>
+</head>
+<body>
+    <!-- 登录视图 -->
+    <div id="loginView">
+        <div class="login-box">
+            <h2 class="login-title">🔐 管理员登录</h2>
+            <form id="adminLoginForm" novalidate>
+                <div class="form-group">
+                    <label class="form-label" for="adminUser">管理员账号</label>
+                    <input type="text" id="adminUser" class="pixel-input" placeholder="请输入管理员账号" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="adminPass">密码</label>
+                    <input type="password" id="adminPass" class="pixel-input" placeholder="请输入密码" required>
+                </div>
+                <div class="login-error" id="loginError"></div>
+                <button type="submit" class="pixel-btn" style="width:100%; margin-top:0.5rem;">登 录</button>
+                <a href="index.html" class="pixel-btn btn-sm" style="width:100%; margin-top:0.8rem; background:#444; display:block; text-align:center;">← 返回首页</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- 后台视图 -->
+    <div id="adminView">
+        <div class="admin-header">
+            <div>
+                <span class="admin-header-title">⚙ 报名管理后台</span>
+                <span class="admin-header-info" id="adminLoginInfo"></span>
+            </div>
+            <div class="admin-controls">
+                <button class="pixel-btn btn-sm btn-red" onclick="adminLogout()">退出登录</button>
+                <a href="index.html" class="pixel-btn btn-sm" style="background:#444;">← 首页</a>
+            </div>
+        </div>
+
+        <div class="admin-toolbar" style="max-width:1400px; margin:0 auto 1rem auto;">
+            <label>状态筛选：</label>
+            <select id="filterStatus" onchange="renderAdminTable()">
+                <option value="all">全部</option>
+                <option value="pending">待审核</option>
+                <option value="approved">已通过</option>
+                <option value="rejected">未通过</option>
+            </select>
+            <label>邮箱搜索：</label>
+            <input type="text" id="searchEmail" placeholder="精确搜索邮箱..." oninput="renderAdminTable()">
+            <button class="pixel-btn btn-xs btn-blue" onclick="exportCSV()">📊 导出Excel(CSV)</button>
+            <span style="margin-left:auto;font-size:0.65rem;color:#888;" id="recordCount">共 0 条记录</span>
+        </div>
+
+        <div class="admin-table-wrapper" style="max-width:1400px; margin:0 auto;">
+            <table class="admin-table" id="adminTable">
+                <thead>
+                    <tr>
+                        <th>序号</th><th>昵称</th><th>游戏ID</th><th>邮箱</th><th>空闲时间</th><th>图片来源</th><th>附件图片</th><th>报名时间</th><th>状态</th><th>邮件发送</th><th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="adminTableBody"></tbody>
+            </table>
+            <div class="empty-msg" id="emptyMsg" style="display:none;">暂无报名数据</div>
+        </div>
+    </div>
+
+    <!-- 图片放大 -->
+    <div class="image-modal" id="imageModal" onclick="this.classList.remove('show')">
+        <img id="imageModalImg" src="" alt="放大查看">
+    </div>
+
+    <!-- 编辑弹窗 -->
+    <div class="pixel-modal-overlay" id="editModal">
+        <div class="pixel-modal" style="text-align:left;">
+            <h3 class="pixel-modal-title">✏ 编辑报名信息</h3>
+            <form id="editForm" novalidate>
+                <input type="hidden" id="editRecordId">
+                <div class="form-group"><label class="form-label">昵称</label><input type="text" id="editNickname" class="pixel-input" required></div>
+                <div class="form-group"><label class="form-label">游戏ID</label><input type="text" id="editGameId" class="pixel-input" required></div>
+                <div class="form-group"><label class="form-label">邮箱</label><input type="email" id="editEmail" class="pixel-input" required></div>
+                <div class="form-group"><label class="form-label">空闲时间（可多选）</label>
+                    <div class="checkbox-group" id="editFreeTimeGroup">
+                        <label class="pixel-checkbox"><input type="checkbox" name="editFreeTime" value="周一~周五晚上"><span class="check-box"></span> 周一~周五晚上</label>
+                        <label class="pixel-checkbox"><input type="checkbox" name="editFreeTime" value="周末下午"><span class="check-box"></span> 周末下午</label>
+                        <label class="pixel-checkbox"><input type="checkbox" name="editFreeTime" value="周末晚上"><span class="check-box"></span> 周末晚上</label>
+                    </div>
+                </div>
+                <div class="form-group"><label class="form-label">图片来源</label>
+                    <div class="radio-group" id="editImgSourceGroup">
+                        <label class="pixel-radio"><input type="radio" name="editImgSource" value="自己建造的游戏截图"><span class="radio-dot"></span> 自己建造的游戏截图</label>
+                        <label class="pixel-radio"><input type="radio" name="editImgSource" value="来自网络教程"><span class="radio-dot"></span> 来自网络教程</label>
+                    </div>
+                </div>
+                <div class="form-group"><label class="form-label">图片附件</label>
+                    <p style="font-size:0.7rem;color:#aaa;">如不需要更换图片请留空，如需更换请重新选择PNG文件</p>
+                    <input type="file" id="editFileInput" accept=".png,image/png" style="display:none;">
+                    <button type="button" class="pixel-btn btn-xs" id="btnEditFileUpload">📁 更换图片</button>
+                    <span class="file-info" id="editFileInfo">不更换</span>
+                </div>
+                <div style="display:flex; gap:0.8rem; margin-top:1.2rem;">
+                    <button type="submit" class="pixel-btn btn-blue btn-sm">💾 保存修改</button>
+                    <button type="button" class="pixel-btn btn-sm" style="background:#555;" onclick="document.getElementById('editModal').classList.remove('show')">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 修改痕迹弹窗 -->
+    <div class="pixel-modal-overlay" id="historyModal">
+        <div class="pixel-modal" style="text-align:left;">
+            <h3 class="pixel-modal-title">📜 修改痕迹</h3>
+            <div id="historyList"></div>
+            <button class="pixel-btn btn-sm" style="background:#555; margin-top:1rem;" onclick="document.getElementById('historyModal').classList.remove('show')">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const STORAGE_KEY = 'bikini_bottom_registrations';
+            const adminAccounts = [
+                { username: 'admin1', password: 'admin123' },
+                { username: 'admin2', password: 'admin123' }
+            ];
+
+            // 登录逻辑
+            document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('adminUser').value.trim();
+                const password = document.getElementById('adminPass').value.trim();
+                const loginError = document.getElementById('loginError');
+                if (adminAccounts.some(a => a.username === username && a.password === password)) {
+                    sessionStorage.setItem('currentAdmin', username);
+                    showAdminView();
+                } else {
+                    loginError.textContent = '❌ 账号或密码错误，请重试';
+                }
+            });
+
+            function showAdminView() {
+                document.getElementById('loginView').style.display = 'none';
+                document.getElementById('adminView').style.display = 'block';
+                document.getElementById('adminLoginInfo').textContent = ' | 当前管理员: ' + sessionStorage.getItem('currentAdmin');
+                renderAdminTable();
+            }
+
+            function adminLogout() {
+                sessionStorage.removeItem('currentAdmin');
+                document.getElementById('loginView').style.display = 'flex';
+                document.getElementById('adminView').style.display = 'none';
+                document.getElementById('adminUser').value = '';
+                document.getElementById('adminPass').value = '';
+                document.getElementById('loginError').textContent = '';
+            }
+            window.adminLogout = adminLogout;
+
+            // 检查是否已登录
+            if (sessionStorage.getItem('currentAdmin')) {
+                showAdminView();
+            } else {
+                document.getElementById('loginView').style.display = 'flex';
+                document.getElementById('adminView').style.display = 'none';
+            }
+
+            // 数据读取
+            function getAllRegistrations() {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            }
+            function saveAllRegistrations(records) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+            }
+
+            // 渲染表格
+            function renderAdminTable() {
+                const allRecords = getAllRegistrations();
+                const filterStatus = document.getElementById('filterStatus').value;
+                const searchEmail = document.getElementById('searchEmail').value.trim().toLowerCase();
+                let filtered = allRecords;
+                if (filterStatus !== 'all') filtered = filtered.filter(r => r.status === filterStatus);
+                if (searchEmail) filtered = filtered.filter(r => r.email.toLowerCase() === searchEmail);
+                filtered.sort((a, b) => b.submitTime.localeCompare(a.submitTime));
+
+                const tbody = document.getElementById('adminTableBody');
+                const emptyMsg = document.getElementById('emptyMsg');
+                document.getElementById('recordCount').textContent = '共 ' + filtered.length + ' 条记录';
+
+                if (filtered.length === 0) {
+                    tbody.innerHTML = '';
+                    emptyMsg.style.display = 'block';
+                    return;
+                }
+                emptyMsg.style.display = 'none';
+
+                let html = '';
+                filtered.forEach((record, index) => {
+                    const freeTimeStr = record.freeTime ? record.freeTime.join(', ') : '-';
+                    const statusMap = { 'pending': '待审核', 'approved': '已通过', 'rejected': '未通过' };
+                    const statusText = statusMap[record.status] || '未知';
+                    const emailStatusText = record.emailStatus === 'sent' ? '✅ 已发送' : record.emailStatus === 'failed' ? '❌ 发送失败' : '—';
+                    const emailStatusClass = record.emailStatus === 'sent' ? 'sent' : record.emailStatus === 'failed' ? 'failed' : 'none';
+                    const hasEditHistory = record.editHistory && record.editHistory.length > 0;
+
+                    html += '<tr>';
+                    html += '<td>' + (index + 1) + '</td>';
+                    html += '<td>' + escapeHtml(record.nickname) + '</td>';
+                    html += '<td>' + escapeHtml(record.gameId) + '</td>';
+                    html += '<td>' + escapeHtml(record.email) + '</td>';
+                    html += '<td>' + escapeHtml(freeTimeStr) + '</td>';
+                    html += '<td>' + escapeHtml(record.imgSource || '-') + '</td>';
+                    html += '<td>';
+                    if (record.imageData) {
+                        html += '<img class="admin-thumb" src="' + record.imageData + '" onclick="window.viewImage(\'' + record.imageData + '\')">';
+                    } else html += '<span style="color:#666;">无</span>';
+                    html += '</td>';
+                    html += '<td>' + escapeHtml(record.submitTime || '-') + '</td>';
+                    html += '<td><span class="status-badge ' + record.status + '">' + statusText + '</span></td>';
+                    html += '<td><span class="email-status ' + emailStatusClass + '">' + emailStatusText + '</span></td>';
+                    html += '<td><div class="btn-group-inline">';
+                    if (record.status === 'pending') {
+                        html += '<button class="pixel-btn btn-xs btn-blue" onclick="window.approveRecord(\'' + record.id + '\')">通过</button>';
+                        html += '<button class="pixel-btn btn-xs btn-red" onclick="window.rejectRecord(\'' + record.id + '\')">不通过</button>';
+                    } else {
+                        html += '<button class="pixel-btn btn-xs" style="background:#888;" onclick="window.resetRecord(\'' + record.id + '\')">退回</button>';
+                    }
+                    html += '<button class="pixel-btn btn-xs" style="background:#555;" onclick="window.openEditModal(\'' + record.id + '\')">编辑</button>';
+                    if (hasEditHistory) html += '<button class="pixel-btn btn-xs" style="background:#444;" onclick="window.showHistory(\'' + record.id + '\')">痕迹</button>';
+                    html += '</div></td></tr>';
+                });
+                tbody.innerHTML = html;
+            }
+
+            function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+            // 操作函数
+            window.approveRecord = function(id) {
+                const records = getAllRegistrations();
+                const record = records.find(r => r.id === id);
+                if (record) {
+                    record.status = 'approved';
+                    record.emailStatus = 'sent';
+                    saveAllRegistrations(records);
+                    renderAdminTable();
+                }
+            };
+            window.rejectRecord = function(id) {
+                const records = getAllRegistrations();
+                const record = records.find(r => r.id === id);
+                if (record) {
+                    record.status = 'rejected';
+                    record.emailStatus = 'none';
+                    saveAllRegistrations(records);
+                    renderAdminTable();
+                }
+            };
+            window.resetRecord = function(id) {
+                const records = getAllRegistrations();
+                const record = records.find(r => r.id === id);
+                if (record) {
+                    record.status = 'pending';
+                    record.emailStatus = 'none';
+                    saveAllRegistrations(records);
+                    renderAdminTable();
+                }
+            };
+
+            // 查看图片
+            window.viewImage = function(src) {
+                document.getElementById('imageModalImg').src = src;
+                document.getElementById('imageModal').classList.add('show');
+            };
+
+            // 编辑功能
+            window.openEditModal = function(id) {
+                const records = getAllRegistrations();
+                const record = records.find(r => r.id === id);
+                if (!record) return;
+                document.getElementById('editRecordId').value = id;
+                document.getElementById('editNickname').value = record.nickname;
+                document.getElementById('editGameId').value = record.gameId;
+                document.getElementById('editEmail').value = record.email;
+                document.querySelectorAll('input[name="editFreeTime"]').forEach(input => {
+                    input.checked = record.freeTime && record.freeTime.includes(input.value);
+                    input.closest('.pixel-checkbox').classList.toggle('checked', input.checked);
+                });
+                document.querySelectorAll('input[name="editImgSource"]').forEach(input => {
+                    input.checked = record.imgSource === input.value;
+                    input.closest('.pixel-radio').classList.toggle('checked', input.checked);
+                });
+                window.editUploadedFileData = null;
+                window.editUploadedFileName = '';
+                document.getElementById('editFileInfo').textContent = '不更换';
+                document.getElementById('editFileInput').value = '';
+                document.getElementById('editModal').classList.add('show');
+            };
+
+            document.getElementById('btnEditFileUpload').addEventListener('click', () => document.getElementById('editFileInput').click());
+            document.getElementById('editFileInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (!file.name.toLowerCase().endsWith('.png') && file.type !== 'image/png') { alert('仅支持PNG格式图片'); this.value=''; return; }
+                if (file.size > 20*1024*1024) { alert('图片大小不能超过20MB'); this.value=''; return; }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    window.editUploadedFileData = e.target.result;
+                    window.editUploadedFileName = file.name;
+                    document.getElementById('editFileInfo').textContent = file.name + ' (' + (file.size/1024/1024).toFixed(2) + 'MB)';
+                };
+                reader.readAsDataURL(file);
+            });
+
+            document.getElementById('editForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const id = document.getElementById('editRecordId').value;
+                const records = getAllRegistrations();
+                const record = records.find(r => r.id === id);
+                if (!record) { alert('记录不存在'); document.getElementById('editModal').classList.remove('show'); return; }
+
+                const newNickname = document.getElementById('editNickname').value.trim();
+                const newGameId = document.getElementById('editGameId').value.trim();
+                const newEmail = document.getElementById('editEmail').value.trim();
+                const newFreeTimes = Array.from(document.querySelectorAll('input[name="editFreeTime"]:checked')).map(el => el.value);
+                const newImgSource = document.querySelector('input[name="editImgSource"]:checked')?.value || '';
+
+                if (!newNickname || !newGameId || !newEmail || newFreeTimes.length===0 || !newImgSource) { alert('请完整填写所有必填字段'); return; }
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(newEmail)) { alert('请输入有效的邮箱地址'); return; }
+                if (records.some(r => r.id !== id && r.email.toLowerCase() === newEmail.toLowerCase())) { alert('该邮箱已被其他报名记录使用'); return; }
+
+                const changes = [];
+                if (record.nickname !== newNickname) changes.push('昵称: ' + record.nickname + ' → ' + newNickname);
+                if (record.gameId !== newGameId) changes.push('游戏ID: ' + record.gameId + ' → ' + newGameId);
+                if (record.email !== newEmail) changes.push('邮箱: ' + record.email + ' → ' + newEmail);
+                const oldFreeTimeStr = (record.freeTime||[]).join(',');
+                const newFreeTimeStr = newFreeTimes.join(',');
+                if (oldFreeTimeStr !== newFreeTimeStr) changes.push('空闲时间: ' + oldFreeTimeStr + ' → ' + newFreeTimeStr);
+                if (record.imgSource !== newImgSource) changes.push('图片来源: ' + record.imgSource + ' → ' + newImgSource);
+                if (window.editUploadedFileData) changes.push('图片附件已更换');
+
+                if (changes.length > 0) {
+                    record.editHistory = record.editHistory || [];
+                    record.editHistory.push({ time: new Date().toLocaleString('zh-CN'), admin: sessionStorage.getItem('currentAdmin') || '未知', changes });
+                    record.lastEditTime = new Date().toLocaleString('zh-CN');
+                    record.lastEditAdmin = sessionStorage.getItem('currentAdmin') || '未知';
+                }
+
+                record.nickname = newNickname;
+                record.gameId = newGameId;
+                record.email = newEmail;
+                record.freeTime = newFreeTimes;
+                record.imgSource = newImgSource;
+                if (window.editUploadedFileData) {
+                    record.imageData = window.editUploadedFileData;
+                    record.imageFileName = window.editUploadedFileName || 'updated.png';
+                }
+
+                saveAllRegistrations(records);
+                document.getElementById('editModal').classList.remove('show');
+                renderAdminTable();
+            });
+
+            // 修改痕迹
+            window.showHistory = function(id) {
+                const records = getAllRegistrations();
+                const record = records.find(r => r.id === id);
+                if (!record || !record.editHistory || record.editHistory.length===0) return;
+                let html = '<p style="font-size:0.7rem;color:#ffd700;margin-bottom:0.8rem;">记录ID: ' + id + '</p>';
+                record.editHistory.forEach(entry => {
+                    html += '<div class="history-item"><span class="hist-time">[' + entry.time + ']</span> <span class="hist-admin">操作人: ' + escapeHtml(entry.admin) + '</span><div class="hist-detail">';
+                    entry.changes.forEach(c => html += '• ' + escapeHtml(c) + '<br>');
+                    html += '</div></div>';
+                });
+                document.getElementById('historyList').innerHTML = html;
+                document.getElementById('historyModal').classList.add('show');
+            };
+
+            // 导出CSV
+            window.exportCSV = function() {
+                const records = getAllRegistrations();
+                if (records.length===0) { alert('暂无数据可导出'); return; }
+                const statusMap = {'pending':'待审核','approved':'已通过','rejected':'未通过'};
+                const emailStatusMap = {'none':'未发送','sent':'已发送','failed':'发送失败'};
+                const headers = ['序号','昵称','游戏ID','邮箱','空闲时间','图片来源','附件文件名','报名时间','状态','邮件发送状态','最后修改时间','最后修改人'];
+                const rows = records.map((r,i) => [
+                    i+1, r.nickname, r.gameId, r.email, (r.freeTime||[]).join('、'), r.imgSource||'', r.imageFileName||'', r.submitTime||'',
+                    statusMap[r.status]||r.status, emailStatusMap[r.emailStatus]||'未发送', r.lastEditTime||'-', r.lastEditAdmin||'-'
+                ]);
+                const csv = '\uFEFF' + [headers.join(','), ...rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g,'""') + '"').join(','))].join('\n');
+                const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = '报名数据_' + new Date().toISOString().slice(0,19).replace(/[T:]/g,'-') + '.csv';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            // 关闭弹窗
+            document.querySelectorAll('.pixel-modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+            });
+        })();
+    </script>
+</body>
+</html>

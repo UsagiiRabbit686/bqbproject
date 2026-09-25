@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>比奇堡小区二期入驻申请 - 提交表单</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DotGothic16&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pixel-black: #1a1a1a; --pixel-dark: #2d2d2d; --pixel-gray: #6b6b6b;
+            --pixel-light: #d4d4d4; --pixel-white: #f5f5f5; --pixel-blue: #4a90d9;
+            --pixel-blue-dark: #2d5a8f; --pixel-green: #5cb85c; --pixel-green-dark: #3d7a3d;
+            --pixel-red: #e05a5a; --pixel-red-dark: #a03d3d; --pixel-yellow: #f0c040;
+            --pixel-yellow-dark: #b8942f; --pixel-orange: #e8823a; --pixel-teal: #4aa3a3;
+            --pixel-purple: #7a5ab8; --pixel-bg-dark: #1a2a3a;
+            --pixel-border: 3px solid #1a1a1a; --pixel-shadow: 5px 5px 0 rgba(0,0,0,0.35);
+            --pixel-shadow-sm: 3px 3px 0 rgba(0,0,0,0.3);
+            --font-pixel-en: 'Press Start 2P', 'DotGothic16', monospace;
+            --font-pixel-zh: 'DotGothic16', 'Press Start 2P', 'Zpix', 'SimSun', monospace;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: var(--font-pixel-zh);
+            background: #0d1b2a;
+            color: var(--pixel-white);
+            min-height:100vh;
+            overflow-x:hidden;
+            image-rendering: pixelated;
+            -webkit-font-smoothing: none;
+            user-select: none;
+        }
+        input, textarea, select { user-select: text; -webkit-user-select: text; font-family: var(--font-pixel-zh); }
+        ::-webkit-scrollbar { width:14px; height:14px; }
+        ::-webkit-scrollbar-track { background:#1a1a1a; border:2px solid #000; }
+        ::-webkit-scrollbar-thumb { background:#6b6b6b; border:2px solid #000; box-shadow: inset 0 0 0 2px #3a3a3a; }
+
+        #page-form {
+            background-image: linear-gradient(rgba(13,27,42,0.8), rgba(13,27,42,0.85)),
+                repeating-linear-gradient(0deg, #1a2a3a 0px, #1a2a3a 4px, #0d1b2a 4px, #0d1b2a 8px);
+            background-size: cover; background-position: center; background-attachment: fixed;
+            min-height:100vh; padding:1rem; position:relative;
+        }
+        #page-form::before {
+            content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 2px, transparent 2px, transparent 4px);
+        }
+        .form-header {
+            position:relative; z-index:5; display:flex; align-items:center; justify-content:space-between;
+            max-width:1100px; margin:0 auto 1.5rem auto; padding:0.8rem 1.2rem;
+            background:rgba(0,0,0,0.75); border:3px solid #1a1a1a; box-shadow:var(--pixel-shadow);
+        }
+        .form-logo { display:flex; align-items:center; gap:1rem; min-height:50px; }
+        .logo-placeholder {
+            width:50px; height:50px; background:var(--pixel-yellow); border:3px solid #1a1a1a;
+            display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-family:var(--font-pixel-en);
+            color:#1a1a1a; image-rendering:pixelated; box-shadow:2px 2px 0 #000; flex-shrink:0;
+        }
+        .form-header-title { font-size:1.2rem; font-weight:bold; letter-spacing:2px; color:#ffd700; text-shadow:2px 2px 0 #000; font-family:var(--font-pixel-zh); }
+        .btn-back-home {
+            font-family:var(--font-pixel-zh); font-size:0.7rem; padding:0.5rem 1rem; background:#444; color:#fff;
+            border:2px solid #1a1a1a; box-shadow:2px 2px 0 #000; cursor:pointer; letter-spacing:1px; text-decoration:none; transition:all 0.1s; flex-shrink:0;
+        }
+        .btn-back-home:hover { background:#666; box-shadow:1px 1px 0 #000; transform:translate(1px,1px); }
+        .form-container {
+            position:relative; z-index:5; max-width:800px; margin:0 auto;
+            background:rgba(20,30,45,0.92); border:4px solid #1a1a1a; box-shadow:8px 8px 0 rgba(0,0,0,0.45);
+            padding:2rem 2.2rem; backdrop-filter:blur(4px);
+        }
+        .form-container-title { text-align:center; font-size:1.4rem; font-weight:bold; color:#ffd700; letter-spacing:3px; margin-bottom:0.5rem; text-shadow:2px 2px 0 #000; font-family:var(--font-pixel-zh); }
+        .form-container-sub { text-align:center; font-size:0.75rem; color:#bbb; letter-spacing:1px; margin-bottom:2rem; font-family:var(--font-pixel-zh); }
+        .form-group { margin-bottom:1.6rem; position:relative; }
+        .form-label { display:block; font-size:0.85rem; font-weight:bold; letter-spacing:1px; color:#ddd; margin-bottom:0.5rem; text-shadow:1px 1px 0 #000; font-family:var(--font-pixel-zh); }
+        .required-star { color:#e05a5a; font-size:1rem; }
+        .pixel-input {
+            width:100%; padding:0.8rem 1rem; background:#0d1b2a; border:3px solid #1a1a1a; color:#fff;
+            font-size:0.9rem; font-family:var(--font-pixel-zh); letter-spacing:1px; outline:none;
+            box-shadow:3px 3px 0 rgba(0,0,0,0.25); transition:all 0.1s; image-rendering:pixelated;
+        }
+        .pixel-input:focus { border-color:#ffd700; box-shadow:3px 3px 0 rgba(255,200,50,0.3); background:#0f2233; }
+        .pixel-input::placeholder { color:#666; font-size:0.75rem; }
+        .pixel-input.input-error { border-color:#e05a5a; box-shadow:3px 3px 0 rgba(224,90,90,0.4); }
+        .error-msg { display:block; font-size:0.65rem; color:#e05a5a; margin-top:0.3rem; letter-spacing:0.5px; font-family:var(--font-pixel-zh); min-height:0; opacity:0; transition:opacity 0.2s; }
+        .error-msg.show { opacity:1; }
+        .checkbox-group, .radio-group { display:flex; flex-wrap:wrap; gap:0.8rem; margin-top:0.3rem; }
+        .pixel-checkbox, .pixel-radio {
+            display:inline-flex; align-items:center; gap:0.5rem; cursor:pointer; font-size:0.8rem; letter-spacing:1px;
+            padding:0.5rem 0.9rem; background:#1a2a3a; border:2px solid #3a3a3a; box-shadow:2px 2px 0 rgba(0,0,0,0.3);
+            transition:all 0.1s; user-select:none; -webkit-user-select:none; color:#ccc;
+        }
+        .pixel-checkbox:hover, .pixel-radio:hover { border-color:#ffd700; color:#fff; background:#1f3344; }
+        .pixel-checkbox input, .pixel-radio input { display:none; }
+        .check-box, .radio-dot {
+            width:18px; height:18px; border:2px solid #fff; background:#0d1b2a; display:inline-flex;
+            align-items:center; justify-content:center; font-size:0.7rem; flex-shrink:0; image-rendering:pixelated;
+        }
+        .pixel-checkbox input:checked + .check-box { background:var(--pixel-green); border-color:#fff; }
+        .pixel-checkbox input:checked + .check-box::after { content:'✓'; color:#fff; font-weight:bold; }
+        .pixel-radio input:checked + .radio-dot { background:var(--pixel-blue); border-color:#fff; }
+        .pixel-radio input:checked + .radio-dot::after { content:'●'; color:#fff; font-size:0.7rem; }
+        .pixel-checkbox.checked, .pixel-radio.checked { border-color:#ffd700; color:#fff; background:#1f3344; }
+        .pixel-file-upload { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+        .pixel-file-btn {
+            font-family:var(--font-pixel-zh); font-size:0.75rem; padding:0.6rem 1.2rem; background:var(--pixel-blue);
+            color:#fff; border:2px solid #1a1a1a; box-shadow:2px 2px 0 #000; cursor:pointer; letter-spacing:1px; transition:all 0.1s; text-shadow:1px 1px 0 #1a1a1a;
+        }
+        .pixel-file-btn:hover { background:var(--pixel-blue-dark); }
+        .pixel-file-btn:active { box-shadow:1px 1px 0 #000; transform:translate(1px,1px); }
+        .file-info { font-size:0.7rem; color:#aaa; letter-spacing:0.5px; }
+        .file-preview {
+            margin-top:0.8rem; max-width:200px; max-height:200px; overflow:hidden; border:3px solid #1a1a1a;
+            box-shadow:3px 3px 0 rgba(0,0,0,0.3); display:none; background:#0d1b2a; image-rendering:pixelated;
+        }
+        .file-preview img { width:100%; height:auto; display:block; image-rendering:pixelated; }
+        .file-preview.show { display:block; }
+        .file-req-hint { font-size:0.6rem; color:#777; letter-spacing:0.5px; margin-top:0.3rem; }
+        .submit-area { margin-top:2rem; text-align:center; }
+        .submit-btn {
+            font-family:var(--font-pixel-zh); font-size:1.1rem; font-weight:bold; padding:1rem 3rem; background:var(--pixel-green);
+            color:#fff; border:3px solid #1a1a1a; box-shadow:5px 5px 0 rgba(0,0,0,0.4); cursor:pointer; letter-spacing:2px;
+            text-shadow:2px 2px 0 #1a1a1a; transition:all 0.12s steps(2); text-transform:uppercase; image-rendering:pixelated; outline:none;
+        }
+        .submit-btn:hover { background:var(--pixel-green-dark); box-shadow:3px 3px 0 rgba(0,0,0,0.4); transform:translate(2px,2px); }
+        .submit-btn:active { box-shadow:1px 1px 0 rgba(0,0,0,0.4); transform:translate(4px,4px); }
+        .submit-btn:disabled { background:#555; cursor:not-allowed; box-shadow:2px 2px 0 #333; transform:none; }
+        .pixel-modal-overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:100; display:none; align-items:center; justify-content:center;
+        }
+        .pixel-modal-overlay.show { display:flex; }
+        .pixel-modal {
+            background:#1a2a3a; border:4px solid #1a1a1a; box-shadow:8px 8px 0 rgba(0,0,0,0.5); padding:2rem;
+            max-width:450px; width:90%; text-align:center; position:relative;
+        }
+        .pixel-modal-title { font-size:1.2rem; font-weight:bold; color:#ffd700; letter-spacing:2px; margin-bottom:1rem; text-shadow:2px 2px 0 #000; }
+        .pixel-modal-text { font-size:0.85rem; color:#ccc; letter-spacing:1px; line-height:1.6; margin-bottom:1.5rem; }
+        .pixel-btn { display:inline-block; font-family:var(--font-pixel-zh); font-size:0.8rem; font-weight:bold; letter-spacing:1px; cursor:pointer; border:3px solid #1a1a1a; box-shadow:var(--pixel-shadow-sm); padding:0.7rem 1.8rem; background:var(--pixel-yellow); color:#1a1a1a; text-decoration:none; transition:all 0.12s; }
+        .pixel-btn:hover { background:var(--pixel-yellow-dark); color:#fff; }
+    </style>
+</head>
+<body>
+    <div id="page-form">
+        <div class="form-header">
+            <div class="form-logo" id="formLogo">
+                <img src="logo.png" alt="Logo" style="width:50px; height:50px; object-fit:contain;">
+            </div>
+            <div class="form-header-title">比奇堡小区二期入驻申请</div>
+            <a href="index.html" class="btn-back-home">← 返回首页</a>
+        </div>
+
+        <div class="form-container">
+            <h2 class="form-container-title">📋 入驻申请表</h2>
+            <p class="form-container-sub">请如实填写以下信息，审核结果将通过邮箱通知</p>
+
+            <form id="applyForm" novalidate>
+                <div class="form-group">
+                    <label class="form-label" for="nickname">昵称 <span class="required-star">*</span></label>
+                    <input type="text" id="nickname" name="nickname" class="pixel-input" placeholder="请输入您的昵称" maxlength="50" required>
+                    <span class="error-msg" id="err-nickname">请输入昵称</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="gameId">游戏ID <span class="required-star">*</span></label>
+                    <input type="text" id="gameId" name="gameId" class="pixel-input" placeholder="请输入您的游戏ID" maxlength="50" required>
+                    <span class="error-msg" id="err-gameId">请输入游戏ID</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="email">邮箱 <span class="required-star">*</span></label>
+                    <input type="email" id="email" name="email" class="pixel-input" placeholder="example@email.com" required>
+                    <span class="error-msg" id="err-email">请输入有效的邮箱地址</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">空闲时间 <span class="required-star">*</span>（可多选）</label>
+                    <div class="checkbox-group" id="freeTimeGroup">
+                        <label class="pixel-checkbox"><input type="checkbox" name="freeTime" value="周一~周五晚上"><span class="check-box"></span> 周一~周五晚上</label>
+                        <label class="pixel-checkbox"><input type="checkbox" name="freeTime" value="周末下午"><span class="check-box"></span> 周末下午</label>
+                        <label class="pixel-checkbox"><input type="checkbox" name="freeTime" value="周末晚上"><span class="check-box"></span> 周末晚上</label>
+                    </div>
+                    <span class="error-msg" id="err-freeTime">请至少选择一个空闲时间</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">图片来源 <span class="required-star">*</span></label>
+                    <div class="radio-group" id="imgSourceGroup">
+                        <label class="pixel-radio"><input type="radio" name="imgSource" value="自己建造的游戏截图"><span class="radio-dot"></span> 自己建造的游戏截图</label>
+                        <label class="pixel-radio"><input type="radio" name="imgSource" value="来自网络教程"><span class="radio-dot"></span> 来自网络教程</label>
+                    </div>
+                    <span class="error-msg" id="err-imgSource">请选择图片来源</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">上传图片 <span class="required-star">*</span></label>
+                    <div class="pixel-file-upload">
+                        <button type="button" class="pixel-file-btn" id="btnFileUpload">📁 选择图片</button>
+                        <input type="file" id="fileInput" accept=".png,image/png" style="display:none;">
+                        <span class="file-info" id="fileInfo">未选择文件</span>
+                    </div>
+                    <div class="file-preview" id="filePreview">
+                        <img id="filePreviewImg" src="" alt="预览图片">
+                    </div>
+                    <span class="file-req-hint">仅支持PNG格式，大小不超过20MB</span>
+                    <span class="error-msg" id="err-file">请上传PNG格式图片（≤20MB）</span>
+                </div>
+                <div class="submit-area">
+                    <button type="submit" class="submit-btn" id="submitBtn">✉ 提交报名</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 成功弹窗 -->
+    <div class="pixel-modal-overlay" id="successModal">
+        <div class="pixel-modal">
+            <h3 class="pixel-modal-title">✅ 提交成功</h3>
+            <p class="pixel-modal-text">您的报名信息已提交成功！<br>审核结果将通过<strong style="color:#ffd700;">邮箱</strong>通知您，请留意查收邮件。</p>
+            <a href="index.html" class="pixel-btn">返回首页</a>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const STORAGE_KEY = 'bikini_bottom_registrations';
+            let uploadedFileData = null;
+            let uploadedFileName = '';
+
+            // 文件上传
+            document.getElementById('btnFileUpload').addEventListener('click', () => document.getElementById('fileInput').click());
+            document.getElementById('fileInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (!file.name.toLowerCase().endsWith('.png') && file.type !== 'image/png') {
+                    document.getElementById('err-file').textContent = '仅支持PNG格式图片';
+                    document.getElementById('err-file').classList.add('show');
+                    this.value = '';
+                    return;
+                }
+                if (file.size > 20 * 1024 * 1024) {
+                    document.getElementById('err-file').textContent = '图片大小不能超过20MB';
+                    document.getElementById('err-file').classList.add('show');
+                    this.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedFileData = e.target.result;
+                    uploadedFileName = file.name;
+                    document.getElementById('fileInfo').textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + 'MB)';
+                    document.getElementById('err-file').classList.remove('show');
+                    const preview = document.getElementById('filePreview');
+                    preview.querySelector('img').src = uploadedFileData;
+                    preview.classList.add('show');
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // 复选框样式更新
+            function updateCheckboxStyle() {
+                document.querySelectorAll('.pixel-checkbox input[type="checkbox"]').forEach(input => {
+                    const label = input.closest('.pixel-checkbox');
+                    if (input.checked) label.classList.add('checked');
+                    input.addEventListener('change', () => label.classList.toggle('checked', input.checked));
+                });
+                document.querySelectorAll('.pixel-radio input[type="radio"]').forEach(input => {
+                    const label = input.closest('.pixel-radio');
+                    if (input.checked) label.classList.add('checked');
+                    input.addEventListener('change', () => {
+                        document.querySelectorAll(`input[name="${input.name}"]`).forEach(r => r.closest('.pixel-radio').classList.remove('checked'));
+                        if (input.checked) label.classList.add('checked');
+                    });
+                });
+            }
+            updateCheckboxStyle();
+
+            // 表单校验
+            function validateForm() {
+                let isValid = true;
+                document.querySelectorAll('.error-msg').forEach(el => el.classList.remove('show'));
+                document.querySelectorAll('.pixel-input').forEach(el => el.classList.remove('input-error'));
+
+                const nickname = document.getElementById('nickname').value.trim();
+                if (!nickname) { showFieldError('nickname', 'err-nickname', '请输入昵称'); isValid = false; }
+                const gameId = document.getElementById('gameId').value.trim();
+                if (!gameId) { showFieldError('gameId', 'err-gameId', '请输入游戏ID'); isValid = false; }
+                const email = document.getElementById('email').value.trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!email || !emailRegex.test(email)) { showFieldError('email', 'err-email', '请输入有效的邮箱地址'); isValid = false; }
+                if (document.querySelectorAll('input[name="freeTime"]:checked').length === 0) {
+                    document.getElementById('err-freeTime').classList.add('show'); isValid = false;
+                }
+                if (!document.querySelector('input[name="imgSource"]:checked')) {
+                    document.getElementById('err-imgSource').classList.add('show'); isValid = false;
+                }
+                if (!uploadedFileData) {
+                    document.getElementById('err-file').textContent = '请上传PNG格式图片';
+                    document.getElementById('err-file').classList.add('show'); isValid = false;
+                }
+                return isValid;
+            }
+
+            function showFieldError(inputId, errId, message) {
+                document.getElementById(inputId).classList.add('input-error');
+                const err = document.getElementById(errId);
+                err.textContent = message;
+                err.classList.add('show');
+            }
+
+            // 提交表单
+            document.getElementById('applyForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (!validateForm()) return;
+
+                const nickname = document.getElementById('nickname').value.trim();
+                const gameId = document.getElementById('gameId').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const freeTimes = Array.from(document.querySelectorAll('input[name="freeTime"]:checked')).map(el => el.value);
+                const imgSource = document.querySelector('input[name="imgSource"]:checked')?.value || '';
+                const submitTime = new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-');
+
+                const allRecords = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                if (allRecords.some(r => r.email.toLowerCase() === email.toLowerCase())) {
+                    document.getElementById('err-email').textContent = '该邮箱已报名，请勿重复提交';
+                    document.getElementById('err-email').classList.add('show');
+                    document.getElementById('email').classList.add('input-error');
+                    return;
+                }
+
+                const record = {
+                    id: 'reg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                    nickname, gameId, email, freeTime: freeTimes, imgSource,
+                    imageData: uploadedFileData, imageFileName: uploadedFileName || 'uploaded.png',
+                    submitTime, status: 'pending', emailStatus: 'none',
+                    editHistory: [], lastEditTime: null, lastEditAdmin: null
+                };
+                allRecords.push(record);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecords));
+
+                // 重置表单
+                document.getElementById('applyForm').reset();
+                uploadedFileData = null; uploadedFileName = '';
+                document.getElementById('fileInfo').textContent = '未选择文件';
+                document.getElementById('filePreview').classList.remove('show');
+                document.getElementById('filePreviewImg').src = '';
+                document.getElementById('fileInput').value = '';
+                document.querySelectorAll('.pixel-checkbox, .pixel-radio').forEach(el => el.classList.remove('checked'));
+
+                // 显示成功弹窗
+                document.getElementById('successModal').classList.add('show');
+            });
+
+            // 关闭弹窗（点击遮罩关闭）
+            document.getElementById('successModal').addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('show');
+            });
+        })();
+    </script>
+</body>
+</html>
