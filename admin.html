@@ -240,7 +240,7 @@
                showAdminView();
            });
 
-            function showAdminView() {
+            async function showAdminView() {
                 document.getElementById('loginView').style.display = 'none';
                 document.getElementById('adminView').style.display = 'block';
                 document.getElementById('adminLoginInfo').textContent = ' | 当前管理员: ' + sessionStorage.getItem('currentAdmin');
