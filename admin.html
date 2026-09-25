@@ -240,7 +240,7 @@
                 document.getElementById('loginView').style.display = 'none';
                 document.getElementById('adminView').style.display = 'block';
                 document.getElementById('adminLoginInfo').textContent = ' | 当前管理员: ' + sessionStorage.getItem('currentAdmin');
-                renderAdminTable();
+                await renderAdminTable();
             }
 
             async function adminLogout() {
@@ -302,56 +302,79 @@
         });
 
             // 数据读取
-            function getAllRegistrations() {
-                return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            async function getAllRegistrations() {
+                const { data, error } = await supabase
+                    .from('registrations')
+                    .select('*')
+                    .order('submit_time', { ascending: false });
+                
+                if (error) {
+                    console.error('读取报名数据失败:', error);
+                    return [];
+                }
+                return data || [];
             }
             function saveAllRegistrations(records) {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
             }
 
+        function formatTime(isoString) {
+            if (!isoString) return '-';
+            const date = new Date(isoString);
+            const pad = (n) => String(n).padStart(2, '0');
+            return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate())
+                + ' ' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+        }
+
             // 渲染表格
-            function renderAdminTable() {
-                const allRecords = getAllRegistrations();
+            async function renderAdminTable() {
+                // 1. 从 Supabase 异步读取数据
+                const allRecords = await getAllRegistrations();
+                
                 const filterStatus = document.getElementById('filterStatus').value;
                 const searchEmail = document.getElementById('searchEmail').value.trim().toLowerCase();
+                
                 let filtered = allRecords;
-                if (filterStatus !== 'all') filtered = filtered.filter(r => r.status === filterStatus);
-                if (searchEmail) filtered = filtered.filter(r => r.email.toLowerCase() === searchEmail);
-                filtered.sort((a, b) => b.submitTime.localeCompare(a.submitTime));
-
+                if (filterStatus !== 'all') {
+                    filtered = filtered.filter(r => r.status === filterStatus);
+                }
+                if (searchEmail) {
+                    filtered = filtered.filter(r => r.email.toLowerCase() === searchEmail);
+                }
                 const tbody = document.getElementById('adminTableBody');
                 const emptyMsg = document.getElementById('emptyMsg');
                 document.getElementById('recordCount').textContent = '共 ' + filtered.length + ' 条记录';
-
                 if (filtered.length === 0) {
                     tbody.innerHTML = '';
                     emptyMsg.style.display = 'block';
                     return;
                 }
                 emptyMsg.style.display = 'none';
-
                 let html = '';
                 filtered.forEach((record, index) => {
-                    const freeTimeStr = record.freeTime ? record.freeTime.join(', ') : '-';
+                    const freeTimeStr = record.free_time ? record.free_time.join(', ') : '-';
                     const statusMap = { 'pending': '待审核', 'approved': '已通过', 'rejected': '未通过' };
                     const statusText = statusMap[record.status] || '未知';
-                    const emailStatusText = record.emailStatus === 'sent' ? '✅ 已发送' : record.emailStatus === 'failed' ? '❌ 发送失败' : '—';
-                    const emailStatusClass = record.emailStatus === 'sent' ? 'sent' : record.emailStatus === 'failed' ? 'failed' : 'none';
-                    const hasEditHistory = record.editHistory && record.editHistory.length > 0;
-
+                    const emailStatusText = record.email_status === 'sent' ? '✅ 已发送'
+                        : record.email_status === 'failed' ? '❌ 发送失败' : '—';
+                    const emailStatusClass = record.email_status === 'sent' ? 'sent'
+                        : record.email_status === 'failed' ? 'failed' : 'none';
+                    const hasEditHistory = record.edit_history && record.edit_history.length > 0;
                     html += '<tr>';
                     html += '<td>' + (index + 1) + '</td>';
                     html += '<td>' + escapeHtml(record.nickname) + '</td>';
-                    html += '<td>' + escapeHtml(record.gameId) + '</td>';
+                    html += '<td>' + escapeHtml(record.game_id) + '</td>';
                     html += '<td>' + escapeHtml(record.email) + '</td>';
                     html += '<td>' + escapeHtml(freeTimeStr) + '</td>';
-                    html += '<td>' + escapeHtml(record.imgSource || '-') + '</td>';
+                    html += '<td>' + escapeHtml(record.img_source || '-') + '</td>';
                     html += '<td>';
-                    if (record.imageData) {
-                        html += '<img class="admin-thumb" src="' + record.imageData + '" onclick="window.viewImage(\'' + record.imageData + '\')">';
-                    } else html += '<span style="color:#666;">无</span>';
+                    if (record.image_url) {
+                        html += '<img class="admin-thumb" src="' + record.image_url + '" onclick="window.viewImage(\'' + record.image_url + '\')">';
+                    } else {
+                        html += '<span style="color:#666;">无</span>';
+                    }
                     html += '</td>';
-                    html += '<td>' + escapeHtml(record.submitTime || '-') + '</td>';
+                    html += '<td>' + escapeHtml(formatTime(record.submit_time)) + '</td>';
                     html += '<td><span class="status-badge ' + record.status + '">' + statusText + '</span></td>';
                     html += '<td><span class="email-status ' + emailStatusClass + '">' + emailStatusText + '</span></td>';
                     html += '<td><div class="btn-group-inline">';
@@ -362,15 +385,16 @@
                         html += '<button class="pixel-btn btn-xs" style="background:#888;" onclick="window.resetRecord(\'' + record.id + '\')">退回</button>';
                     }
                     html += '<button class="pixel-btn btn-xs" style="background:#555;" onclick="window.openEditModal(\'' + record.id + '\')">编辑</button>';
-                    if (hasEditHistory) html += '<button class="pixel-btn btn-xs" style="background:#444;" onclick="window.showHistory(\'' + record.id + '\')">痕迹</button>';
+                    if (hasEditHistory) {
+                        html += '<button class="pixel-btn btn-xs" style="background:#444;" onclick="window.showHistory(\'' + record.id + '\')">痕迹</button>';
+                    }
                     html += '</div></td></tr>';
                 });
                 tbody.innerHTML = html;
             }
+        function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
 
-            function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
-
-            // 操作函数
+          // 操作函数
             window.approveRecord = function(id) {
                 const records = getAllRegistrations();
                 const record = records.find(r => r.id === id);
@@ -378,7 +402,7 @@
                     record.status = 'approved';
                     record.emailStatus = 'sent';
                     saveAllRegistrations(records);
-                    renderAdminTable();
+                    await renderAdminTable();;
                 }
             };
             window.rejectRecord = function(id) {
@@ -388,7 +412,7 @@
                     record.status = 'rejected';
                     record.emailStatus = 'none';
                     saveAllRegistrations(records);
-                    renderAdminTable();
+                    await renderAdminTable();;
                 }
             };
             window.resetRecord = function(id) {
@@ -398,7 +422,7 @@
                     record.status = 'pending';
                     record.emailStatus = 'none';
                     saveAllRegistrations(records);
-                    renderAdminTable();
+                    await renderAdminTable();;
                 }
             };
 
@@ -494,7 +518,7 @@
 
                 saveAllRegistrations(records);
                 document.getElementById('editModal').classList.remove('show');
-                renderAdminTable();
+                await renderAdminTable();;
             });
 
             // 修改痕迹
