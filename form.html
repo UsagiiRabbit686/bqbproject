@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DotGothic16&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --pixel-black: #1a1a1a; --pixel-dark: #2d2d2d; --pixel-gray: #6b6b6b;
@@ -216,40 +217,65 @@
 
     <script>
         (function() {
+            const supabaseUrl = 'https://nuozfdovyvkvjfflhziy.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51b3pmZG92eXZrdmpmZmxoeml5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMDY1MjIsImV4cCI6MjEwNTg4MjUyMn0.e3qhoBg_ZPs4p5aTnPHXHP44Mc3iqG9liG-fFY2eLmQ';
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
             const STORAGE_KEY = 'bikini_bottom_registrations';
-            let uploadedFileData = null;
-            let uploadedFileName = '';
+            let uploadedFile = null;        // 保存 File 对象，而不是 base64 数据
+            let uploadedFileUrl = null;     // 上传成功后返回的公开URL
+
+            async function uploadImage(file) {
+                // 生成唯一文件名，避免重名覆盖
+                const fileName = 'reg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '.png';
+                
+                const { data, error } = await supabase.storage
+                    .from('registration-images')   // 你的 Storage 桶名称
+                .upload(fileName, file, {
+                    contentType: 'image/png',
+                    upsert: false
+                });
+                if (error) {
+                    throw new Error('图片上传失败：' + error.message);
+                }
+                // 获取公开URL
+                    const { data: urlData } = supabase.storage
+                        .from('registration-images')
+                        .getPublicUrl(fileName);
+                return urlData.publicUrl;
+            }
+
+            
 
             // 文件上传
             document.getElementById('btnFileUpload').addEventListener('click', () => document.getElementById('fileInput').click());
             document.getElementById('fileInput').addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (!file) return;
+                // 校验格式
                 if (!file.name.toLowerCase().endsWith('.png') && file.type !== 'image/png') {
                     document.getElementById('err-file').textContent = '仅支持PNG格式图片';
                     document.getElementById('err-file').classList.add('show');
                     this.value = '';
                     return;
                 }
+                // 校验大小
                 if (file.size > 20 * 1024 * 1024) {
                     document.getElementById('err-file').textContent = '图片大小不能超过20MB';
                     document.getElementById('err-file').classList.add('show');
                     this.value = '';
                     return;
                 }
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    uploadedFileData = e.target.result;
-                    uploadedFileName = file.name;
-                    document.getElementById('fileInfo').textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + 'MB)';
-                    document.getElementById('err-file').classList.remove('show');
-                    const preview = document.getElementById('filePreview');
-                    preview.querySelector('img').src = uploadedFileData;
-                    preview.classList.add('show');
-                };
-                reader.readAsDataURL(file);
+                
+                // 保存 File 对象
+                uploadedFile = file;
+                document.getElementById('fileInfo').textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + 'MB)';
+                document.getElementById('err-file').classList.remove('show');
+                
+                // 本地预览（用 URL.createObjectURL，比 base64 更高效）
+                const preview = document.getElementById('filePreview');
+                preview.querySelector('img').src = URL.createObjectURL(file);
+                preview.classList.add('show');
             });
-
             // 复选框样式更新
             function updateCheckboxStyle() {
                 document.querySelectorAll('.pixel-checkbox input[type="checkbox"]').forEach(input => {
@@ -302,46 +328,71 @@
             }
 
             // 提交表单
-            document.getElementById('applyForm').addEventListener('submit', function(e) {
+            document.getElementById('applyForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 if (!validateForm()) return;
-
+                
                 const nickname = document.getElementById('nickname').value.trim();
                 const gameId = document.getElementById('gameId').value.trim();
                 const email = document.getElementById('email').value.trim();
-                const freeTimes = Array.from(document.querySelectorAll('input[name="freeTime"]:checked')).map(el => el.value);
+                const freeTimes = Array.from(
+                    document.querySelectorAll('input[name="freeTime"]:checked')
+                ).map(el => el.value);
                 const imgSource = document.querySelector('input[name="imgSource"]:checked')?.value || '';
-                const submitTime = new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '-');
-
-                const allRecords = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-                if (allRecords.some(r => r.email.toLowerCase() === email.toLowerCase())) {
-                    document.getElementById('err-email').textContent = '该邮箱已报名，请勿重复提交';
-                    document.getElementById('err-email').classList.add('show');
-                    document.getElementById('email').classList.add('input-error');
-                    return;
+                
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.disabled = true;
+                submitBtn.textContent = '⏳ 提交中...';
+                
+                try {
+                    // 1. 上传图片到 Supabase Storage
+                    const imageUrl = await uploadImage(uploadedFile);
+                    
+                    // 2. 插入数据到 Supabase 数据库
+                    const { error } = await supabase
+                        .from('registrations')
+                        .insert([{
+                            nickname: nickname,
+                            game_id: gameId,
+                            email: email,
+                            free_time: freeTimes,
+                            img_source: imgSource,
+                            image_url: imageUrl
+                        }]);
+                    if (error) {
+                        if (error.code === '23505') {
+                            document.getElementById('err-email').textContent = '该邮箱已报名，请勿重复提交';
+                            document.getElementById('err-email').classList.add('show');
+                            document.getElementById('email').classList.add('input-error');
+                        } else {
+                            alert('提交失败：' + error.message);
+                        }
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '✉ 提交报名';
+                        return;
+                    }
+                    
+                    // 3. 提交成功，重置表单
+                    document.getElementById('applyForm').reset();
+                    uploadedFile = null;
+                    uploadedFileUrl = null;
+                    document.getElementById('fileInfo').textContent = '未选择文件';
+                    document.getElementById('filePreview').classList.remove('show');
+                    document.getElementById('filePreviewImg').src = '';
+                    document.getElementById('fileInput').value = '';
+                    document.querySelectorAll('.pixel-checkbox, .pixel-radio').forEach(el => el.classList.remove('checked'))
+                        
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '✉ 提交报名';
+                    
+                    // 显示成功弹窗
+                    document.getElementById('successModal').classList.add('show');
+                } catch (err) {
+                    console.error(err);
+                    alert('网络错误，请稍后重试');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = '✉ 提交报名';
                 }
-
-                const record = {
-                    id: 'reg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
-                    nickname, gameId, email, freeTime: freeTimes, imgSource,
-                    imageData: uploadedFileData, imageFileName: uploadedFileName || 'uploaded.png',
-                    submitTime, status: 'pending', emailStatus: 'none',
-                    editHistory: [], lastEditTime: null, lastEditAdmin: null
-                };
-                allRecords.push(record);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecords));
-
-                // 重置表单
-                document.getElementById('applyForm').reset();
-                uploadedFileData = null; uploadedFileName = '';
-                document.getElementById('fileInfo').textContent = '未选择文件';
-                document.getElementById('filePreview').classList.remove('show');
-                document.getElementById('filePreviewImg').src = '';
-                document.getElementById('fileInput').value = '';
-                document.querySelectorAll('.pixel-checkbox, .pixel-radio').forEach(el => el.classList.remove('checked'));
-
-                // 显示成功弹窗
-                document.getElementById('successModal').classList.add('show');
             });
 
             // 关闭弹窗（点击遮罩关闭）
