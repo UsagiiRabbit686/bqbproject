@@ -7,6 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DotGothic16&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <style>
         :root {
             --pixel-black: #1a1a1a; --pixel-dark: #2d2d2d; --pixel-gray: #6b6b6b;
@@ -193,25 +195,36 @@
 
     <script>
         (function() {
+            // Supabase 初始化
+            const supabaseUrl = 'https://nuozfdovyvkvjfflhziy.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51b3pmZG92eXZrdmpmZmxoeml5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMDY1MjIsImV4cCI6MjEwNTg4MjUyMn0.e3qhoBg_ZPs4p5aTnPHXHP44Mc3iqG9liG-fFY2eLmQ';
+            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            
+            // EmailJS 初始化
+            emailjs.init('你的EmailJS_PublicKey');
             const STORAGE_KEY = 'bikini_bottom_registrations';
-            const adminAccounts = [
-                { username: 'admin1', password: 'admin123' },
-                { username: 'admin2', password: 'admin123' }
-            ];
+            
 
             // 登录逻辑
-            document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const username = document.getElementById('adminUser').value.trim();
-                const password = document.getElementById('adminPass').value.trim();
-                const loginError = document.getElementById('loginError');
-                if (adminAccounts.some(a => a.username === username && a.password === password)) {
-                    sessionStorage.setItem('currentAdmin', username);
-                    showAdminView();
-                } else {
-                    loginError.textContent = '❌ 账号或密码错误，请重试';
-                }
-            });
+           document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+               e.preventDefault();
+               const email = document.getElementById('adminUser').value.trim(); // 现在填邮箱
+               const password = document.getElementById('adminPass').value.trim();
+               const loginError = document.getElementById('loginError');
+               const { data, error } = await supabase.auth.signInWithPassword({
+                   email: email,
+                   password: password
+               });
+
+               if (error) {
+                   loginError.textContent = '❌ ' + error.message;
+                   return;
+               }
+
+               sessionStorage.setItem('adminToken', data.session.access_token);
+               sessionStorage.setItem('currentAdmin', email);
+               showAdminView();
+           });
 
             function showAdminView() {
                 document.getElementById('loginView').style.display = 'none';
