@@ -392,7 +392,20 @@
                 });
                 tbody.innerHTML = html;
             }
-        function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+        function escapeHtml(str) { 
+            const d = document.createElement('div'); 
+            d.textContent = str; 
+            return d.innerHTML; 
+                                 }
+        // 时间格式化：将 ISO 时间字符串转为 "YYYY-MM-DD HH:mm"
+        function formatTime(isoString) {
+            if (!isoString) return '-';
+            const date = new Date(isoString);
+            if (isNaN(date.getTime())) return '-';
+            const pad = (n) => String(n).padStart(2, '0');
+            return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate())
+                + ' ' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+        }
 
           // 操作函数
             window.approveRecord = function(id) {
