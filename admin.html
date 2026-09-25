@@ -211,29 +211,33 @@
 
             // 登录逻辑
            document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
-               e.preventDefault();
-               const email = document.getElementById('adminUser').value.trim(); // 现在填邮箱
-               const password = document.getElementById('adminPass').value.trim();
-               const loginError = document.getElementById('loginError');
-               loginError.textContent = '';
-               const { data, error } = await supabase.auth.signInWithPassword({
-                   email: email,
-                   password: password
-               });
+    e.preventDefault();
 
-               if (error) {
-                   loginError.textContent = '❌ ' + error.message;
-                   return;
-               }
+    const email = document.getElementById('adminUser').value.trim();
+    const password = document.getElementById('adminPass').value.trim();
+    const loginError = document.getElementById('loginError');
 
-               // 登录成功
-               sessionStorage.setItem('adminToken', data.session.access_token);
-               sessionStorage.setItem('currentAdmin', email);
-               showAdminView();
-           } catch (err) {
-               loginError.textContent = '❌ 无法连接服务器';
+    loginError.textContent = '';
+
+    try {
+        const { data, error } = await sbClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        if (error) {
+            loginError.textContent = '❌ ' + error.message;
+            return;
         }
-         });
+
+        // 登录成功：交给 onAuthStateChanged 处理视图切换
+        sessionStorage.setItem('adminToken', data.session.access_token);
+        sessionStorage.setItem('currentAdmin', email);
+
+    } catch (err) {
+        loginError.textContent = '❌ 无法连接服务器';
+    }
+});
 
                sessionStorage.setItem('adminToken', data.session.access_token);
                sessionStorage.setItem('currentAdmin', email);
