@@ -211,6 +211,7 @@
                const email = document.getElementById('adminUser').value.trim(); // 现在填邮箱
                const password = document.getElementById('adminPass').value.trim();
                const loginError = document.getElementById('loginError');
+               loginError.textContent = '';
                const { data, error } = await supabase.auth.signInWithPassword({
                    email: email,
                    password: password
@@ -220,6 +221,15 @@
                    loginError.textContent = '❌ ' + error.message;
                    return;
                }
+
+               // 登录成功
+               sessionStorage.setItem('adminToken', data.session.access_token);
+               sessionStorage.setItem('currentAdmin', email);
+               showAdminView();
+           } catch (err) {
+               loginError.textContent = '❌ 无法连接服务器';
+        }
+         });
 
                sessionStorage.setItem('adminToken', data.session.access_token);
                sessionStorage.setItem('currentAdmin', email);
@@ -233,23 +243,63 @@
                 renderAdminTable();
             }
 
-            function adminLogout() {
+            async function adminLogout() {
+                // 1. 通知 Supabase 登出（清除服务端会话）
+                await supabase.auth.signOut();
+
+                // 2. 清除本地缓存的 token 和管理员信息
+                sessionStorage.removeItem('adminToken');
                 sessionStorage.removeItem('currentAdmin');
-                document.getElementById('loginView').style.display = 'flex';
-                document.getElementById('adminView').style.display = 'none';
+
+                // 3. 清空登录表单
                 document.getElementById('adminUser').value = '';
                 document.getElementById('adminPass').value = '';
                 document.getElementById('loginError').textContent = '';
-            }
-            window.adminLogout = adminLogout;
 
-            // 检查是否已登录
-            if (sessionStorage.getItem('currentAdmin')) {
+                
+            }
+        window.adminLogout = adminLogout;
+
+            // 好难写呃呃呃呃呃啊啊啊啊啊啊啊
+            // 检查登录状态（Supabase Auth）
+        async function checkAuth() {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (error) {
+                console.error('获取会话失败:', error);
+                showLoginView();
+                return;
+            }
+            
+            if (session) {
+                // 已登录
+                sessionStorage.setItem('adminToken', session.access_token);
+                sessionStorage.setItem('currentAdmin', session.user.email);
                 showAdminView();
             } else {
-                document.getElementById('loginView').style.display = 'flex';
-                document.getElementById('adminView').style.display = 'none';
+                // 未登录
+                showLoginView();
             }
+        }
+        
+        function showLoginView() {
+            document.getElementById('loginView').style.display = 'flex';
+            document.getElementById('adminView').style.display = 'none';
+        }
+        // 页面加载时立即检查
+        checkAuth();
+
+        supabase.auth.onAuthStateChanged((event, session) => {
+            if (session) {
+                sessionStorage.setItem('adminToken', session.access_token);
+                sessionStorage.setItem('currentAdmin', session.user.email);
+                showAdminView();
+            } else {
+                sessionStorage.removeItem('adminToken');
+                sessionStorage.removeItem('currentAdmin');
+                showLoginView();
+            }
+        });
 
             // 数据读取
             function getAllRegistrations() {
