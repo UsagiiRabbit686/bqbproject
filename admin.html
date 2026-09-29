@@ -685,38 +685,62 @@
         // ============================================================
         // 11. 导出 CSV
         // ============================================================
-        window.exportCSV = async function() {
-            const records = await getAllRegistrations();
-            if (records.length === 0) {
-                alert('暂无数据可导出');
-                return;
-            }
-            const statusMap = { 'pending': '待审核', 'approved': '已通过', 'rejected': '未通过' };
-            const emailStatusMap = { 'none': '未发送', 'sent': '已发送', 'failed': '发送失败' };
-            const headers = ['序号', '昵称', '游戏ID', '邮箱', '空闲时间', '图片来源', '图片URL', '报名时间', '状态', '邮件发送状态', '最后修改时间', '最后修改人'];
-            const rows = records.map((r, i) => [
-                i + 1,
-                r.nickname,
-                r.game_id,
-                r.email,
-                (r.free_time || []).join('、'),
-                r.img_source || '',
-                r.image_url || '',
-                formatTime(r.submit_time),
-                statusMap[r.status] || r.status,
-                emailStatusMap[r.email_status] || '未发送',
-                r.last_edit_time ? formatTime(r.last_edit_time) : '-',
-                r.last_edit_admin || '-'
-            ]);
-            const csv = '\uFEFF' + [headers.join(','), ...rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(','))].join('\n');
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = '报名数据_' + new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-') + '.csv';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        };
+        wwindow.exportCSV = async function() {
+    // 1. 从 Supabase 读取所有报名数据
+    const records = await getAllRegistrations();
+
+    if (records.length === 0) {
+        alert('暂无数据可导出');
+        return;
+    }
+
+    // 2. 字段映射
+    const statusMap = { 'pending': '待审核', 'approved': '已通过', 'rejected': '未通过' };
+    const emailStatusMap = { 'none': '未发送', 'sent': '已发送', 'failed': '发送失败' };
+
+    // 3. 表头
+    const headers = [
+        '序号', '昵称', '游戏ID', '邮箱', '空闲时间',
+        '图片来源', '图片URL', '报名时间', '状态',
+        '邮件发送状态', '最后修改时间', '最后修改人'
+    ];
+
+    // 4. 数据行
+    const rows = records.map((r, i) => [
+        i + 1,
+        r.nickname || '',
+        r.game_id || '',
+        r.email || '',
+        (r.free_time || []).join('、'),
+        r.img_source || '',
+        r.image_url || '',
+        formatTime(r.submit_time),
+        statusMap[r.status] || r.status || '',
+        emailStatusMap[r.email_status] || '未发送',
+        r.last_edit_time ? formatTime(r.last_edit_time) : '-',
+        r.last_edit_admin || '-'
+    ]);
+
+    // 5. 生成 CSV 内容
+    // \uFEFF 是 BOM，让 Excel 正确识别 UTF-8 中文
+    const csv = '\uFEFF' + [
+        headers.join(','),
+        ...rows.map(row =>
+            row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(',')
+        )
+    ].join('\n');
+
+    // 6. 触发下载
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = '报名数据_' + new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-') + '.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    console.log('✅ 已导出', records.length, '条记录');
+};
 
         // ============================================================
         // 12. 关闭弹窗
