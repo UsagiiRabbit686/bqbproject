@@ -414,7 +414,7 @@
           // 操作函数
            window.approveRecord = async function(id) {
                // 1. 从 Supabase 获取该条记录
-               const { data: record, error: fetchError } = await sbClient
+               const { data: record, error: fetchError } = await supabase
                    .from('registrations')
                    .select('*')
                    .eq('id', id)
@@ -428,7 +428,7 @@
     const templateParams = {
         to_email: record.email,
         to_name: record.nickname,
-        group_number: '8888-6666-000'   // 替换为你的真实群号
+        group_number: '1127754096'   // 替换为你的真实群号
     };
 
     let emailStatus = 'failed';
@@ -436,8 +436,8 @@
     // 3. 发送邮件
     try {
         await emailjs.send(
-            '你的ServiceID',
-            '你的TemplateID',
+            'bqbservice686',
+            'bqbservice',
             templateParams
         );
         emailStatus = 'sent';
