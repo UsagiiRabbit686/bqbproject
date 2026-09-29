@@ -193,106 +193,77 @@
         </div>
     </div>
 
-    <script>
-        (function() {
-            // Supabase 初始化
-            const supabaseUrl = 'https://nuozfdovyvkvjfflhziy.supabase.co';
-            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51b3pmZG92eXZrdmpmZmxoeml5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMDY1MjIsImV4cCI6MjEwNTg4MjUyMn0.e3qhoBg_ZPs4p5aTnPHXHP44Mc3iqG9liG-fFY2eLmQ';
+   <script>
+    (function() {
+        // ============================================================
+        // 1. 初始化
+        // ============================================================
+        const supabaseUrl = 'https://nuozfdovyvkvjfflhziy.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51b3pmZG92eXZrdmpmZmxoeml5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMDY1MjIsImV4cCI6MjEwNTg4MjUyMn0.e3qhoBg_ZPs4p5aTnPHXHP44Mc3iqG9liG-fFY2eLmQ';
 
-            console.log('URL:', supabaseUrl);
-            console.log('KEY:', supabaseKey);
-            
-            const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-            
-            // EmailJS 初始化
-            emailjs.init('你的EmailJS_PublicKey');
-            const STORAGE_KEY = 'bikini_bottom_registrations';
-            
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-            // 登录逻辑
-           document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
-               e.preventDefault();
-               const email = document.getElementById('adminUser').value.trim();
-               const password = document.getElementById('adminPass').value.trim();
-               const loginError = document.getElementById('loginError');
-               loginError.textContent = '';
-               try {
-                   const { data, error } = await sbClient.auth.signInWithPassword({
-                       email: email,
-                       password: password
-                   });
+        // ⚠️ 替换为你真实的 EmailJS Public Key
+        emailjs.init('XaCE_eDN_Uy-81slb');
 
-                   if (error) {
-                       loginError.textContent = '❌ ' + error.message;
-                       return;
-                   }
+        console.log('✅ 初始化完成');
 
-                   // 登录成功：交给 onAuthStateChanged 处理视图切换
-                   sessionStorage.setItem('adminToken', data.session.access_token);
-                   essionStorage.setItem('currentAdmin', email);
-               } catch (err) {
-                   loginError.textContent = '❌ 无法连接服务器';
-               }
-           });
+        // ============================================================
+        // 2. 登录表单
+        // ============================================================
+        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('adminUser').value.trim();
+            const password = document.getElementById('adminPass').value.trim();
+            const loginError = document.getElementById('loginError');
+            loginError.textContent = '';
 
-               sessionStorage.setItem('adminToken', data.session.access_token);
-               sessionStorage.setItem('currentAdmin', email);
-               showAdminView();
-           });
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
 
-            async function showAdminView() {
-                document.getElementById('loginView').style.display = 'none';
-                document.getElementById('adminView').style.display = 'block';
-                document.getElementById('adminLoginInfo').textContent = ' | 当前管理员: ' + sessionStorage.getItem('currentAdmin');
-                await renderAdminTable();
+                if (error) {
+                    loginError.textContent = '❌ ' + error.message;
+                    return;
+                }
+                // 登录成功由 onAuthStateChanged 自动处理视图切换
+            } catch (err) {
+                console.error(err);
+                loginError.textContent = '❌ 无法连接服务器';
             }
+        });
 
-            async function adminLogout() {
-                // 1. 通知 Supabase 登出（清除服务端会话）
-                await supabase.auth.signOut();
-
-                // 2. 清除本地缓存的 token 和管理员信息
-                sessionStorage.removeItem('adminToken');
-                sessionStorage.removeItem('currentAdmin');
-
-                // 3. 清空登录表单
-                document.getElementById('adminUser').value = '';
-                document.getElementById('adminPass').value = '';
-                document.getElementById('loginError').textContent = '';
-
-                
-            }
-        window.adminLogout = adminLogout;
-
-            // 好难写呃呃呃呃呃啊啊啊啊啊啊啊
-            // 检查登录状态（Supabase Auth）
-        async function checkAuth() {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            
-            if (error) {
-                console.error('获取会话失败:', error);
-                showLoginView();
-                return;
-            }
-            
-            if (session) {
-                // 已登录
-                sessionStorage.setItem('adminToken', session.access_token);
-                sessionStorage.setItem('currentAdmin', session.user.email);
-                showAdminView();
-            } else {
-                // 未登录
-                showLoginView();
-            }
+        // ============================================================
+        // 3. 视图切换
+        // ============================================================
+        async function showAdminView() {
+            document.getElementById('loginView').style.display = 'none';
+            document.getElementById('adminView').style.display = 'block';
+            document.getElementById('adminLoginInfo').textContent =
+                ' | 当前管理员: ' + (sessionStorage.getItem('currentAdmin') || '');
+            await renderAdminTable();
         }
-        
+
         function showLoginView() {
             document.getElementById('loginView').style.display = 'flex';
             document.getElementById('adminView').style.display = 'none';
         }
-        // 页面加载时立即检查
-        checkAuth();
 
+        async function adminLogout() {
+            await supabase.auth.signOut();
+            sessionStorage.removeItem('adminToken');
+            sessionStorage.removeItem('currentAdmin');
+            document.getElementById('adminUser').value = '';
+            document.getElementById('adminPass').value = '';
+            document.getElementById('loginError').textContent = '';
+        }
+        window.adminLogout = adminLogout;
+
+        // ============================================================
+        // 4. 登录状态监听
+        // ============================================================
         supabase.auth.onAuthStateChanged((event, session) => {
             if (session) {
                 sessionStorage.setItem('adminToken', session.access_token);
@@ -305,103 +276,21 @@
             }
         });
 
-            // 数据读取
-            async function getAllRegistrations() {
-                const { data, error } = await supabase
-                    .from('registrations')
-                    .select('*')
-                    .order('submit_time', { ascending: false });
-                
-                if (error) {
-                    console.error('读取报名数据失败:', error);
-                    return [];
-                }
-                return data || [];
+        // ============================================================
+        // 5. 工具函数
+        // ============================================================
+        async function getAllRegistrations() {
+            const { data, error } = await supabase
+                .from('registrations')
+                .select('*')
+                .order('submit_time', { ascending: false });
+            if (error) {
+                console.error('读取报名数据失败:', error);
+                return [];
             }
-            function saveAllRegistrations(records) {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
-            }
-
-        function formatTime(isoString) {
-            if (!isoString) return '-';
-            const date = new Date(isoString);
-            const pad = (n) => String(n).padStart(2, '0');
-            return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate())
-                + ' ' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+            return data || [];
         }
 
-            // 渲染表格
-            async function renderAdminTable() {
-                // 1. 从 Supabase 异步读取数据
-                const allRecords = await getAllRegistrations();
-                
-                const filterStatus = document.getElementById('filterStatus').value;
-                const searchEmail = document.getElementById('searchEmail').value.trim().toLowerCase();
-                
-                let filtered = allRecords;
-                if (filterStatus !== 'all') {
-                    filtered = filtered.filter(r => r.status === filterStatus);
-                }
-                if (searchEmail) {
-                    filtered = filtered.filter(r => r.email.toLowerCase() === searchEmail);
-                }
-                const tbody = document.getElementById('adminTableBody');
-                const emptyMsg = document.getElementById('emptyMsg');
-                document.getElementById('recordCount').textContent = '共 ' + filtered.length + ' 条记录';
-                if (filtered.length === 0) {
-                    tbody.innerHTML = '';
-                    emptyMsg.style.display = 'block';
-                    return;
-                }
-                emptyMsg.style.display = 'none';
-                let html = '';
-                filtered.forEach((record, index) => {
-                    const freeTimeStr = record.free_time ? record.free_time.join(', ') : '-';
-                    const statusMap = { 'pending': '待审核', 'approved': '已通过', 'rejected': '未通过' };
-                    const statusText = statusMap[record.status] || '未知';
-                    const emailStatusText = record.email_status === 'sent' ? '✅ 已发送'
-                        : record.email_status === 'failed' ? '❌ 发送失败' : '—';
-                    const emailStatusClass = record.email_status === 'sent' ? 'sent'
-                        : record.email_status === 'failed' ? 'failed' : 'none';
-                    const hasEditHistory = record.edit_history && record.edit_history.length > 0;
-                    html += '<tr>';
-                    html += '<td>' + (index + 1) + '</td>';
-                    html += '<td>' + escapeHtml(record.nickname) + '</td>';
-                    html += '<td>' + escapeHtml(record.game_id) + '</td>';
-                    html += '<td>' + escapeHtml(record.email) + '</td>';
-                    html += '<td>' + escapeHtml(freeTimeStr) + '</td>';
-                    html += '<td>' + escapeHtml(record.img_source || '-') + '</td>';
-                    html += '<td>';
-                    if (record.image_url) {
-                        html += '<img class="admin-thumb" src="' + record.image_url + '" onclick="window.viewImage(\'' + record.image_url + '\')">';
-                    } else {
-                        html += '<span style="color:#666;">无</span>';
-                    }
-                    html += '</td>';
-                    html += '<td>' + escapeHtml(formatTime(record.submit_time)) + '</td>';
-                    html += '<td><span class="status-badge ' + record.status + '">' + statusText + '</span></td>';
-                    html += '<td><span class="email-status ' + emailStatusClass + '">' + emailStatusText + '</span></td>';
-                    html += '<td><div class="btn-group-inline">';
-                    if (record.status === 'pending') {
-                        html += '<button class="pixel-btn btn-xs btn-blue" onclick="window.approveRecord(\'' + record.id + '\')">通过</button>';
-                        html += '<button class="pixel-btn btn-xs btn-red" onclick="window.rejectRecord(\'' + record.id + '\')">不通过</button>';
-                    } else {
-                        html += '<button class="pixel-btn btn-xs" style="background:#888;" onclick="window.resetRecord(\'' + record.id + '\')">退回</button>';
-                    }
-                    html += '<button class="pixel-btn btn-xs" style="background:#555;" onclick="window.openEditModal(\'' + record.id + '\')">编辑</button>';
-                    if (hasEditHistory) {
-                        html += '<button class="pixel-btn btn-xs" style="background:#444;" onclick="window.showHistory(\'' + record.id + '\')">痕迹</button>';
-                    }
-                    html += '</div></td></tr>';
-                });
-                tbody.innerHTML = html;
-            }
-        function escapeHtml(str) { 
-            const d = document.createElement('div'); 
-            d.textContent = str; 
-            return d.innerHTML; 
-                                 }
-        // 时间格式化：将 ISO 时间字符串转为 "YYYY-MM-DD HH:mm"
         function formatTime(isoString) {
             if (!isoString) return '-';
             const date = new Date(isoString);
@@ -411,236 +300,411 @@
                 + ' ' + pad(date.getHours()) + ':' + pad(date.getMinutes());
         }
 
-          // 操作函数
-           window.approveRecord = async function(id) {
-               // 1. 从 Supabase 获取该条记录
-               const { data: record, error: fetchError } = await supabase
-                   .from('registrations')
-                   .select('*')
-                   .eq('id', id)
-                   .single();
-               if (fetchError || !record) {
-        alert('记录不存在或读取失败');
-        return;
-    }
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            const d = document.createElement('div');
+            d.textContent = String(str);
+            return d.innerHTML;
+        }
 
-    // 2. 准备 EmailJS 模板变量
-    const templateParams = {
-        to_email: record.email,
-        to_name: record.nickname,
-        group_number: '1127754096'   // 替换为你的真实群号
-    };
+        // ============================================================
+        // 6. 渲染表格
+        // ============================================================
+        async function renderAdminTable() {
+            const allRecords = await getAllRegistrations();
 
-    let emailStatus = 'failed';
+            const filterStatus = document.getElementById('filterStatus').value;
+            const searchEmail = document.getElementById('searchEmail').value.trim().toLowerCase();
 
-    // 3. 发送邮件
-    try {
-        await emailjs.send(
-            'bqbservice686',
-            'bqbservice',
-            templateParams
-        );
-        emailStatus = 'sent';
-        console.log('邮件发送成功:', record.email);
-    } catch (emailError) {
-        console.error('邮件发送失败:', emailError);
-    }
+            let filtered = allRecords;
+            if (filterStatus !== 'all') {
+                filtered = filtered.filter(r => r.status === filterStatus);
+            }
+            if (searchEmail) {
+                filtered = filtered.filter(r => (r.email || '').toLowerCase() === searchEmail);
+            }
 
-    // 4. 更新数据库状态
-    const { error: updateError } = await sbClient
-        .from('registrations')
-        .update({
-            status: 'approved',
-            email_status: emailStatus,
-            last_edit_time: new Date().toISOString(),
-            last_edit_admin: sessionStorage.getItem('currentAdmin') || '未知'
-        })
-        .eq('id', id);
+            const tbody = document.getElementById('adminTableBody');
+            const emptyMsg = document.getElementById('emptyMsg');
+            document.getElementById('recordCount').textContent = '共 ' + filtered.length + ' 条记录';
 
-    if (updateError) {
-        alert('状态更新失败：' + updateError.message);
-        return;
-    }
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                emptyMsg.style.display = 'block';
+                return;
+            }
+            emptyMsg.style.display = 'none';
 
-    // 5. 刷新表格
-    await renderAdminTable();
+            let html = '';
+            filtered.forEach((record, index) => {
+                const freeTimeStr = record.free_time ? record.free_time.join(', ') : '-';
+                const statusMap = { 'pending': '待审核', 'approved': '已通过', 'rejected': '未通过' };
+                const statusText = statusMap[record.status] || '未知';
+                const emailStatusText = record.email_status === 'sent' ? '✅ 已发送'
+                    : record.email_status === 'failed' ? '❌ 发送失败' : '—';
+                const emailStatusClass = record.email_status === 'sent' ? 'sent'
+                    : record.email_status === 'failed' ? 'failed' : 'none';
+                const hasEditHistory = record.edit_history && record.edit_history.length > 0;
 
-    if (emailStatus !== 'sent') {
-        alert('审核已通过，但邮件发送失败，请检查 EmailJS 配置');
-    }
-};
-           window.rejectRecord = async function(id) {
-    const { error } = await sbClient
-        .from('registrations')
-        .update({
-            status: 'rejected',
-            email_status: 'none',
-            last_edit_time: new Date().toISOString(),
-            last_edit_admin: sessionStorage.getItem('currentAdmin') || '未知'
-        })
-        .eq('id', id);
-
-    if (error) {
-        alert('操作失败：' + error.message);
-        return;
-    }
-    await renderAdminTable();
-};
-
-window.resetRecord = async function(id) {
-    const { error } = await sbClient
-        .from('registrations')
-        .update({
-            status: 'pending',
-            email_status: 'none',
-            last_edit_time: new Date().toISOString(),
-            last_edit_admin: sessionStorage.getItem('currentAdmin') || '未知'
-        })
-        .eq('id', id);
-
-    if (error) {
-        alert('操作失败：' + error.message);
-        return;
-    }
-    await renderAdminTable();
-};
-
-            // 查看图片
-            window.viewImage = function(src) {
-                document.getElementById('imageModalImg').src = src;
-                document.getElementById('imageModal').classList.add('show');
-            };
-
-            // 编辑功能
-            window.openEditModal = function(id) {
-                const records = getAllRegistrations();
-                const record = records.find(r => r.id === id);
-                if (!record) return;
-                document.getElementById('editRecordId').value = id;
-                document.getElementById('editNickname').value = record.nickname;
-                document.getElementById('editGameId').value = record.gameId;
-                document.getElementById('editEmail').value = record.email;
-                document.querySelectorAll('input[name="editFreeTime"]').forEach(input => {
-                    input.checked = record.freeTime && record.freeTime.includes(input.value);
-                    input.closest('.pixel-checkbox').classList.toggle('checked', input.checked);
-                });
-                document.querySelectorAll('input[name="editImgSource"]').forEach(input => {
-                    input.checked = record.imgSource === input.value;
-                    input.closest('.pixel-radio').classList.toggle('checked', input.checked);
-                });
-                window.editUploadedFileData = null;
-                window.editUploadedFileName = '';
-                document.getElementById('editFileInfo').textContent = '不更换';
-                document.getElementById('editFileInput').value = '';
-                document.getElementById('editModal').classList.add('show');
-            };
-
-            document.getElementById('btnEditFileUpload').addEventListener('click', () => document.getElementById('editFileInput').click());
-            document.getElementById('editFileInput').addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                if (!file.name.toLowerCase().endsWith('.png') && file.type !== 'image/png') { alert('仅支持PNG格式图片'); this.value=''; return; }
-                if (file.size > 20*1024*1024) { alert('图片大小不能超过20MB'); this.value=''; return; }
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    window.editUploadedFileData = e.target.result;
-                    window.editUploadedFileName = file.name;
-                    document.getElementById('editFileInfo').textContent = file.name + ' (' + (file.size/1024/1024).toFixed(2) + 'MB)';
-                };
-                reader.readAsDataURL(file);
-            });
-
-            document.getElementById('editForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const id = document.getElementById('editRecordId').value;
-                const records = getAllRegistrations();
-                const record = records.find(r => r.id === id);
-                if (!record) { alert('记录不存在'); document.getElementById('editModal').classList.remove('show'); return; }
-
-                const newNickname = document.getElementById('editNickname').value.trim();
-                const newGameId = document.getElementById('editGameId').value.trim();
-                const newEmail = document.getElementById('editEmail').value.trim();
-                const newFreeTimes = Array.from(document.querySelectorAll('input[name="editFreeTime"]:checked')).map(el => el.value);
-                const newImgSource = document.querySelector('input[name="editImgSource"]:checked')?.value || '';
-
-                if (!newNickname || !newGameId || !newEmail || newFreeTimes.length===0 || !newImgSource) { alert('请完整填写所有必填字段'); return; }
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(newEmail)) { alert('请输入有效的邮箱地址'); return; }
-                if (records.some(r => r.id !== id && r.email.toLowerCase() === newEmail.toLowerCase())) { alert('该邮箱已被其他报名记录使用'); return; }
-
-                const changes = [];
-                if (record.nickname !== newNickname) changes.push('昵称: ' + record.nickname + ' → ' + newNickname);
-                if (record.gameId !== newGameId) changes.push('游戏ID: ' + record.gameId + ' → ' + newGameId);
-                if (record.email !== newEmail) changes.push('邮箱: ' + record.email + ' → ' + newEmail);
-                const oldFreeTimeStr = (record.freeTime||[]).join(',');
-                const newFreeTimeStr = newFreeTimes.join(',');
-                if (oldFreeTimeStr !== newFreeTimeStr) changes.push('空闲时间: ' + oldFreeTimeStr + ' → ' + newFreeTimeStr);
-                if (record.imgSource !== newImgSource) changes.push('图片来源: ' + record.imgSource + ' → ' + newImgSource);
-                if (window.editUploadedFileData) changes.push('图片附件已更换');
-
-                if (changes.length > 0) {
-                    record.editHistory = record.editHistory || [];
-                    record.editHistory.push({ time: new Date().toLocaleString('zh-CN'), admin: sessionStorage.getItem('currentAdmin') || '未知', changes });
-                    record.lastEditTime = new Date().toLocaleString('zh-CN');
-                    record.lastEditAdmin = sessionStorage.getItem('currentAdmin') || '未知';
+                html += '<tr>';
+                html += '<td>' + (index + 1) + '</td>';
+                html += '<td>' + escapeHtml(record.nickname) + '</td>';
+                html += '<td>' + escapeHtml(record.game_id) + '</td>';
+                html += '<td>' + escapeHtml(record.email) + '</td>';
+                html += '<td>' + escapeHtml(freeTimeStr) + '</td>';
+                html += '<td>' + escapeHtml(record.img_source || '-') + '</td>';
+                html += '<td>';
+                if (record.image_url) {
+                    html += '<img class="admin-thumb" src="' + record.image_url + '" onclick="window.viewImage(\'' + record.image_url + '\')">';
+                } else {
+                    html += '<span style="color:#666;">无</span>';
                 }
-
-                record.nickname = newNickname;
-                record.gameId = newGameId;
-                record.email = newEmail;
-                record.freeTime = newFreeTimes;
-                record.imgSource = newImgSource;
-                if (window.editUploadedFileData) {
-                    record.imageData = window.editUploadedFileData;
-                    record.imageFileName = window.editUploadedFileName || 'updated.png';
+                html += '</td>';
+                html += '<td>' + escapeHtml(formatTime(record.submit_time)) + '</td>';
+                html += '<td><span class="status-badge ' + record.status + '">' + statusText + '</span></td>';
+                html += '<td><span class="email-status ' + emailStatusClass + '">' + emailStatusText + '</span></td>';
+                html += '<td><div class="btn-group-inline">';
+                if (record.status === 'pending') {
+                    html += '<button class="pixel-btn btn-xs btn-blue" onclick="window.approveRecord(\'' + record.id + '\')">通过</button>';
+                    html += '<button class="pixel-btn btn-xs btn-red" onclick="window.rejectRecord(\'' + record.id + '\')">不通过</button>';
+                } else {
+                    html += '<button class="pixel-btn btn-xs" style="background:#888;" onclick="window.resetRecord(\'' + record.id + '\')">退回</button>';
                 }
+                html += '<button class="pixel-btn btn-xs" style="background:#555;" onclick="window.openEditModal(\'' + record.id + '\')">编辑</button>';
+                if (hasEditHistory) {
+                    html += '<button class="pixel-btn btn-xs" style="background:#444;" onclick="window.showHistory(\'' + record.id + '\')">痕迹</button>';
+                }
+                html += '</div></td></tr>';
+            });
+            tbody.innerHTML = html;
+        }
 
-                saveAllRegistrations(records);
-                document.getElementById('editModal').classList.remove('show');
-                renderAdminTable();;
+        // ============================================================
+        // 7. 审核操作
+        // ============================================================
+        window.approveRecord = async function(id) {
+            const { data: record, error: fetchError } = await supabase
+                .from('registrations')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (fetchError || !record) {
+                alert('记录不存在或读取失败');
+                return;
+            }
+
+            const templateParams = {
+                to_email: record.email,
+                to_name: record.nickname,
+                group_number: '1127754096'
+            };
+
+            let emailStatus = 'failed';
+            try {
+                await emailjs.send('bqbservice686', 'bqbservice', templateParams);
+                emailStatus = 'sent';
+                console.log('邮件发送成功:', record.email);
+            } catch (emailError) {
+                console.error('邮件发送失败:', emailError);
+            }
+
+            const { error: updateError } = await supabase
+                .from('registrations')
+                .update({
+                    status: 'approved',
+                    email_status: emailStatus,
+                    last_edit_time: new Date().toISOString(),
+                    last_edit_admin: sessionStorage.getItem('currentAdmin') || '未知'
+                })
+                .eq('id', id);
+
+            if (updateError) {
+                alert('状态更新失败：' + updateError.message);
+                return;
+            }
+
+            await renderAdminTable();
+
+            if (emailStatus !== 'sent') {
+                alert('审核已通过，但邮件发送失败，请检查 EmailJS 配置');
+            }
+        };
+
+        window.rejectRecord = async function(id) {
+            const { error } = await supabase
+                .from('registrations')
+                .update({
+                    status: 'rejected',
+                    email_status: 'none',
+                    last_edit_time: new Date().toISOString(),
+                    last_edit_admin: sessionStorage.getItem('currentAdmin') || '未知'
+                })
+                .eq('id', id);
+
+            if (error) {
+                alert('操作失败：' + error.message);
+                return;
+            }
+            await renderAdminTable();
+        };
+
+        window.resetRecord = async function(id) {
+            const { error } = await supabase
+                .from('registrations')
+                .update({
+                    status: 'pending',
+                    email_status: 'none',
+                    last_edit_time: new Date().toISOString(),
+                    last_edit_admin: sessionStorage.getItem('currentAdmin') || '未知'
+                })
+                .eq('id', id);
+
+            if (error) {
+                alert('操作失败：' + error.message);
+                return;
+            }
+            await renderAdminTable();
+        };
+
+        // ============================================================
+        // 8. 图片查看
+        // ============================================================
+        window.viewImage = function(src) {
+            document.getElementById('imageModalImg').src = src;
+            document.getElementById('imageModal').classList.add('show');
+        };
+
+        // ============================================================
+        // 9. 编辑功能
+        // ============================================================
+        let editUploadedFile = null;  // 编辑时新选择的图片文件
+
+        window.openEditModal = async function(id) {
+            const { data: record, error } = await supabase
+                .from('registrations')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error || !record) {
+                alert('记录不存在');
+                return;
+            }
+
+            document.getElementById('editRecordId').value = id;
+            document.getElementById('editNickname').value = record.nickname || '';
+            document.getElementById('editGameId').value = record.game_id || '';
+            document.getElementById('editEmail').value = record.email || '';
+
+            document.querySelectorAll('input[name="editFreeTime"]').forEach(input => {
+                input.checked = record.free_time && record.free_time.includes(input.value);
+                input.closest('.pixel-checkbox').classList.toggle('checked', input.checked);
+            });
+            document.querySelectorAll('input[name="editImgSource"]').forEach(input => {
+                input.checked = record.img_source === input.value;
+                input.closest('.pixel-radio').classList.toggle('checked', input.checked);
             });
 
-            // 修改痕迹
-            window.showHistory = function(id) {
-                const records = getAllRegistrations();
-                const record = records.find(r => r.id === id);
-                if (!record || !record.editHistory || record.editHistory.length===0) return;
-                let html = '<p style="font-size:0.7rem;color:#ffd700;margin-bottom:0.8rem;">记录ID: ' + id + '</p>';
-                record.editHistory.forEach(entry => {
-                    html += '<div class="history-item"><span class="hist-time">[' + entry.time + ']</span> <span class="hist-admin">操作人: ' + escapeHtml(entry.admin) + '</span><div class="hist-detail">';
-                    entry.changes.forEach(c => html += '• ' + escapeHtml(c) + '<br>');
-                    html += '</div></div>';
+            editUploadedFile = null;
+            document.getElementById('editFileInfo').textContent = '不更换';
+            document.getElementById('editFileInput').value = '';
+            document.getElementById('editModal').classList.add('show');
+        };
+
+        document.getElementById('btnEditFileUpload').addEventListener('click', () => {
+            document.getElementById('editFileInput').click();
+        });
+
+        document.getElementById('editFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (!file.name.toLowerCase().endsWith('.png') && file.type !== 'image/png') {
+                alert('仅支持PNG格式图片');
+                this.value = '';
+                return;
+            }
+            if (file.size > 20 * 1024 * 1024) {
+                alert('图片大小不能超过20MB');
+                this.value = '';
+                return;
+            }
+            editUploadedFile = file;
+            document.getElementById('editFileInfo').textContent =
+                file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + 'MB)';
+        });
+
+        // 编辑表单提交（Supabase 版本）
+        document.getElementById('editForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('editRecordId').value;
+            const newNickname = document.getElementById('editNickname').value.trim();
+            const newGameId = document.getElementById('editGameId').value.trim();
+            const newEmail = document.getElementById('editEmail').value.trim();
+            const newFreeTimes = Array.from(document.querySelectorAll('input[name="editFreeTime"]:checked')).map(el => el.value);
+            const newImgSource = document.querySelector('input[name="editImgSource"]:checked')?.value || '';
+
+            if (!newNickname || !newGameId || !newEmail || newFreeTimes.length === 0 || !newImgSource) {
+                alert('请完整填写所有必填字段');
+                return;
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(newEmail)) {
+                alert('请输入有效的邮箱地址');
+                return;
+            }
+
+            // 读取原记录以生成修改痕迹
+            const { data: oldRecord, error: fetchError } = await supabase
+                .from('registrations')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (fetchError || !oldRecord) {
+                alert('记录不存在');
+                return;
+            }
+
+            // 计算修改痕迹
+            const changes = [];
+            if (oldRecord.nickname !== newNickname) changes.push('昵称: ' + oldRecord.nickname + ' → ' + newNickname);
+            if (oldRecord.game_id !== newGameId) changes.push('游戏ID: ' + oldRecord.game_id + ' → ' + newGameId);
+            if (oldRecord.email !== newEmail) changes.push('邮箱: ' + oldRecord.email + ' → ' + newEmail);
+            const oldFreeTimeStr = (oldRecord.free_time || []).join(',');
+            const newFreeTimeStr = newFreeTimes.join(',');
+            if (oldFreeTimeStr !== newFreeTimeStr) changes.push('空闲时间: ' + oldFreeTimeStr + ' → ' + newFreeTimeStr);
+            if (oldRecord.img_source !== newImgSource) changes.push('图片来源: ' + oldRecord.img_source + ' → ' + newImgSource);
+            if (editUploadedFile) changes.push('图片附件已更换');
+
+            // 如果有新图片，先上传到 Storage
+            let newImageUrl = oldRecord.image_url;
+            if (editUploadedFile) {
+                try {
+                    const fileName = 'reg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '.png';
+                    const { error: uploadError } = await supabase.storage
+                        .from('registration-images')
+                        .upload(fileName, editUploadedFile, { contentType: 'image/png', upsert: false });
+                    if (uploadError) throw uploadError;
+
+                    const { data: urlData } = supabase.storage
+                        .from('registration-images')
+                        .getPublicUrl(fileName);
+                    newImageUrl = urlData.publicUrl;
+                } catch (uploadErr) {
+                    console.error('图片上传失败:', uploadErr);
+                    alert('图片上传失败：' + uploadErr.message);
+                    return;
+                }
+            }
+
+            // 构建 edit_history
+            const editHistory = oldRecord.edit_history || [];
+            if (changes.length > 0) {
+                editHistory.push({
+                    time: new Date().toLocaleString('zh-CN'),
+                    admin: sessionStorage.getItem('currentAdmin') || '未知',
+                    changes: changes
                 });
-                document.getElementById('historyList').innerHTML = html;
-                document.getElementById('historyModal').classList.add('show');
-            };
+            }
 
-            // 导出CSV
-            window.exportCSV = function() {
-                const records = getAllRegistrations();
-                if (records.length===0) { alert('暂无数据可导出'); return; }
-                const statusMap = {'pending':'待审核','approved':'已通过','rejected':'未通过'};
-                const emailStatusMap = {'none':'未发送','sent':'已发送','failed':'发送失败'};
-                const headers = ['序号','昵称','游戏ID','邮箱','空闲时间','图片来源','附件文件名','报名时间','状态','邮件发送状态','最后修改时间','最后修改人'];
-                const rows = records.map((r,i) => [
-                    i+1, r.nickname, r.gameId, r.email, (r.freeTime||[]).join('、'), r.imgSource||'', r.imageFileName||'', r.submitTime||'',
-                    statusMap[r.status]||r.status, emailStatusMap[r.emailStatus]||'未发送', r.lastEditTime||'-', r.lastEditAdmin||'-'
-                ]);
-                const csv = '\uFEFF' + [headers.join(','), ...rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g,'""') + '"').join(','))].join('\n');
-                const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = '报名数据_' + new Date().toISOString().slice(0,19).replace(/[T:]/g,'-') + '.csv';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            };
+            // 更新数据库
+            const { error: updateError } = await supabase
+                .from('registrations')
+                .update({
+                    nickname: newNickname,
+                    game_id: newGameId,
+                    email: newEmail,
+                    free_time: newFreeTimes,
+                    img_source: newImgSource,
+                    image_url: newImageUrl,
+                    edit_history: editHistory,
+                    last_edit_time: new Date().toISOString(),
+                    last_edit_admin: sessionStorage.getItem('currentAdmin') || '未知'
+                })
+                .eq('id', id);
 
-            // 关闭弹窗
-            document.querySelectorAll('.pixel-modal-overlay').forEach(overlay => {
-                overlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+            if (updateError) {
+                alert('保存失败：' + updateError.message);
+                return;
+            }
+
+            document.getElementById('editModal').classList.remove('show');
+            await renderAdminTable();
+        });
+
+        // ============================================================
+        // 10. 修改痕迹
+        // ============================================================
+        window.showHistory = async function(id) {
+            const { data: record, error } = await supabase
+                .from('registrations')
+                .select('edit_history')
+                .eq('id', id)
+                .single();
+
+            if (error || !record || !record.edit_history || record.edit_history.length === 0) {
+                alert('暂无修改记录');
+                return;
+            }
+
+            let html = '<p style="font-size:0.7rem;color:#ffd700;margin-bottom:0.8rem;">记录ID: ' + id + '</p>';
+            record.edit_history.forEach(entry => {
+                html += '<div class="history-item"><span class="hist-time">[' + escapeHtml(entry.time) + ']</span> <span class="hist-admin">操作人: ' + escapeHtml(entry.admin) + '</span><div class="hist-detail">';
+                (entry.changes || []).forEach(c => { html += '• ' + escapeHtml(c) + '<br>'; });
+                html += '</div></div>';
             });
-        })();
-    </script>
+            document.getElementById('historyList').innerHTML = html;
+            document.getElementById('historyModal').classList.add('show');
+        };
+
+        // ============================================================
+        // 11. 导出 CSV
+        // ============================================================
+        window.exportCSV = async function() {
+            const records = await getAllRegistrations();
+            if (records.length === 0) {
+                alert('暂无数据可导出');
+                return;
+            }
+            const statusMap = { 'pending': '待审核', 'approved': '已通过', 'rejected': '未通过' };
+            const emailStatusMap = { 'none': '未发送', 'sent': '已发送', 'failed': '发送失败' };
+            const headers = ['序号', '昵称', '游戏ID', '邮箱', '空闲时间', '图片来源', '图片URL', '报名时间', '状态', '邮件发送状态', '最后修改时间', '最后修改人'];
+            const rows = records.map((r, i) => [
+                i + 1,
+                r.nickname,
+                r.game_id,
+                r.email,
+                (r.free_time || []).join('、'),
+                r.img_source || '',
+                r.image_url || '',
+                formatTime(r.submit_time),
+                statusMap[r.status] || r.status,
+                emailStatusMap[r.email_status] || '未发送',
+                r.last_edit_time ? formatTime(r.last_edit_time) : '-',
+                r.last_edit_admin || '-'
+            ]);
+            const csv = '\uFEFF' + [headers.join(','), ...rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(','))].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = '报名数据_' + new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-') + '.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        // ============================================================
+        // 12. 关闭弹窗
+        // ============================================================
+        document.querySelectorAll('.pixel-modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('show');
+            });
+        });
+
+    })();
+</script>
 </body>
 </html>
