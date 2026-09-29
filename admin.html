@@ -149,40 +149,40 @@
     </div>
 
     <!-- 编辑弹窗 -->
-    <div class="pixel-modal-overlay" id="editModal">
-        <div class="pixel-modal" style="text-align:left;">
-            <h3 class="pixel-modal-title">✏ 编辑报名信息</h3>
-            <form id="editForm" novalidate>
-                <input type="hidden" id="editRecordId">
-                <div class="form-group"><label class="form-label">昵称</label><input type="text" id="editNickname" class="pixel-input" required></div>
-                <div class="form-group"><label class="form-label">游戏ID</label><input type="text" id="editGameId" class="pixel-input" required></div>
-                <div class="form-group"><label class="form-label">邮箱</label><input type="email" id="editEmail" class="pixel-input" required></div>
-                <div class="form-group"><label class="form-label">空闲时间（可多选）</label>
-                    <div class="checkbox-group" id="editFreeTimeGroup">
-                        <label class="pixel-checkbox"><input type="checkbox" name="editFreeTime" value="周一~周五晚上"><span class="check-box"></span> 周一~周五晚上</label>
-                        <label class="pixel-checkbox"><input type="checkbox" name="editFreeTime" value="周末下午"><span class="check-box"></span> 周末下午</label>
-                        <label class="pixel-checkbox"><input type="checkbox" name="editFreeTime" value="周末晚上"><span class="check-box"></span> 周末晚上</label>
-                    </div>
+   <div class="pixel-modal-overlay" id="editModal">
+    <div class="pixel-modal" style="text-align:left;">
+        <h3 class="pixel-modal-title">✏ 编辑报名信息</h3>
+        <form id="editForm" novalidate>
+            <input type="hidden" id="editRecordId">
+            <div class="form-group"><label class="form-label">昵称</label><input type="text" id="editNickname" class="pixel-input" required></div>
+            <div class="form-group"><label class="form-label">游戏ID</label><input type="text" id="editGameId" class="pixel-input" required></div>
+            <div class="form-group"><label class="form-label">邮箱</label><input type="email" id="editEmail" class="pixel-input" required></div>
+            <div class="form-group"><label class="form-label">空闲时间（可多选）</label>
+                <div class="checkbox-group" id="editFreeTimeGroup">
+                    <label class="pixel-checkbox"><input type="checkbox" name="editFreeTime" value="周一~周五晚上"><span class="check-box"></span> 周一~周五晚上</label>
+                    <label class="pixel-checkbox"><input type="checkbox" name="editFreeTime" value="周末下午"><span class="check-box"></span> 周末下午</label>
+                    <label class="pixel-checkbox"><input type="checkbox" name="editFreeTime" value="周末晚上"><span class="check-box"></span> 周末晚上</label>
                 </div>
-                <div class="form-group"><label class="form-label">图片来源</label>
-                    <div class="radio-group" id="editImgSourceGroup">
-                        <label class="pixel-radio"><input type="radio" name="editImgSource" value="自己建造的游戏截图"><span class="radio-dot"></span> 自己建造的游戏截图</label>
-                        <label class="pixel-radio"><input type="radio" name="editImgSource" value="来自网络教程"><span class="radio-dot"></span> 来自网络教程</label>
-                    </div>
+            </div>
+            <div class="form-group"><label class="form-label">图片来源</label>
+                <div class="radio-group" id="editImgSourceGroup">
+                    <label class="pixel-radio"><input type="radio" name="editImgSource" value="自己建造的游戏截图"><span class="radio-dot"></span> 自己建造的游戏截图</label>
+                    <label class="pixel-radio"><input type="radio" name="editImgSource" value="来自网络教程"><span class="radio-dot"></span> 来自网络教程</label>
                 </div>
-                <div class="form-group"><label class="form-label">图片附件</label>
-                    <p style="font-size:0.7rem;color:#aaa;">如不需要更换图片请留空，如需更换请重新选择PNG文件</p>
-                    <input type="file" id="editFileInput" accept=".png,image/png" style="display:none;">
-                    <button type="button" class="pixel-btn btn-xs" id="btnEditFileUpload">📁 更换图片</button>
-                    <span class="file-info" id="editFileInfo">不更换</span>
-                </div>
-                <div style="display:flex; gap:0.8rem; margin-top:1.2rem;">
-                    <button type="submit" class="pixel-btn btn-blue btn-sm">💾 保存修改</button>
-                    <button type="button" class="pixel-btn btn-sm" style="background:#555;" onclick="document.getElementById('editModal').classList.remove('show')">取消</button>
-                </div>
-            </form>
-        </div>
+            </div>
+            <div class="form-group"><label class="form-label">图片附件</label>
+                <p style="font-size:0.7rem;color:#aaa;">如不需要更换图片请留空，如需更换请重新选择PNG文件</p>
+                <input type="file" id="editFileInput" accept=".png,image/png" style="display:none;">
+                <button type="button" class="pixel-btn btn-xs" id="btnEditFileUpload">📁 更换图片</button>
+                <span class="file-info" id="editFileInfo">不更换</span>
+            </div>
+            <div style="display:flex; gap:0.8rem; margin-top:1.2rem;">
+                <button type="submit" class="pixel-btn btn-blue btn-sm">💾 保存修改</button>
+                <button type="button" class="pixel-btn btn-sm" style="background:#555;" onclick="document.getElementById('editModal').classList.remove('show')">取消</button>
+            </div>
+        </form>
     </div>
+</div>
 
     <!-- 修改痕迹弹窗 -->
     <div class="pixel-modal-overlay" id="historyModal">
@@ -532,7 +532,7 @@
                 return;
             }
             if (file.size > 20 * 1024 * 1024) {
-                alert('图片大小不能超过20MB');
+                alert('图片大小不能超过5MB');
                 this.value = '';
                 return;
             }
@@ -573,6 +573,18 @@
                 alert('记录不存在');
                 return;
             }
+
+            // 邮箱冲突检查
+    const { data: conflict } = await supabase
+        .from('registrations')
+        .select('id')
+        .eq('email', newEmail)
+        .neq('id', id);
+
+    if (conflict && conflict.length > 0) {
+        alert('该邮箱已被其他报名记录使用');
+        return;
+    }
 
             // 计算修改痕迹
             const changes = [];
@@ -657,14 +669,18 @@
             }
 
             let html = '<p style="font-size:0.7rem;color:#ffd700;margin-bottom:0.8rem;">记录ID: ' + id + '</p>';
-            record.edit_history.forEach(entry => {
-                html += '<div class="history-item"><span class="hist-time">[' + escapeHtml(entry.time) + ']</span> <span class="hist-admin">操作人: ' + escapeHtml(entry.admin) + '</span><div class="hist-detail">';
-                (entry.changes || []).forEach(c => { html += '• ' + escapeHtml(c) + '<br>'; });
-                html += '</div></div>';
-            });
-            document.getElementById('historyList').innerHTML = html;
-            document.getElementById('historyModal').classList.add('show');
-        };
+    record.edit_history.forEach(entry => {
+        html += '<div class="history-item">';
+        html += '<span class="hist-time">[' + escapeHtml(entry.time) + ']</span> ';
+        html += '<span class="hist-admin">操作人: ' + escapeHtml(entry.admin) + '</span>';
+        html += '<div class="hist-detail">';
+        (entry.changes || []).forEach(c => { html += '• ' + escapeHtml(c) + '<br>'; });
+        html += '</div></div>';
+    });
+    document.getElementById('historyList').innerHTML = html;
+    document.getElementById('historyModal').classList.add('show');
+};
+
 
         // ============================================================
         // 11. 导出 CSV
