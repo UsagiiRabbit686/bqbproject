@@ -271,7 +271,7 @@
         // ============================================================
         // 4. 登录状态监听
         // ============================================================
-        supabase.auth.onAuthStateChanged((event, session) => {
+        supabase.auth.onAuthStateChange((event, session) => {
             if (session) {
                 sessionStorage.setItem('adminToken', session.access_token);
                 sessionStorage.setItem('currentAdmin', session.user.email);
