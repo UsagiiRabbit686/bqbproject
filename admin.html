@@ -211,33 +211,40 @@
         // ============================================================
         // 2. 登录表单
         // ============================================================
-        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const email = document.getElementById('adminUser').value.trim();
-            const password = document.getElementById('adminPass').value.trim();
-            const loginError = document.getElementById('loginError');
-            loginError.textContent = '';
+       document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const email = document.getElementById('adminUser').value.trim();
+  const password = document.getElementById('adminPass').value.trim();
+  const loginError = document.getElementById('loginError');
+  loginError.textContent = '';
 
-            try {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
 
-                if (error) {
-                    loginError.textContent = '❌ ' + error.message;
-                    return;
-                }
-                // 登录成功由 onAuthStateChanged 自动处理视图切换
-            } catch (err) {
-                console.error(err);
-                loginError.textContent = '❌ 无法连接服务器';
-            }
-        });
+    if (error) {
+      loginError.textContent = '❌ ' + error.message;
+      return;
+    }
 
-        // ============================================================
-        // 3. 视图切换
-        // ============================================================
+    // sign-in success: save info and show admin view
+    if (data?.session?.access_token) {
+      sessionStorage.setItem('adminToken', data.session.access_token);
+    }
+    if (data?.user?.email) {
+      sessionStorage.setItem('currentAdmin', data.user.email);
+    } else {
+      sessionStorage.setItem('currentAdmin', email);
+    }
+    showAdminView();
+  } catch (err) {
+    console.error(err);
+    loginError.textContent = '❌ 无法连接服务器';
+  }
+});
+
         async function showAdminView() {
             document.getElementById('loginView').style.display = 'none';
             document.getElementById('adminView').style.display = 'block';
