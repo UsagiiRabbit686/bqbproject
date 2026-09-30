@@ -71,6 +71,48 @@
         }
         .form-container-title { text-align:center; font-size:1.4rem; font-weight:bold; color:#ffd700; letter-spacing:3px; margin-bottom:0.5rem; text-shadow:2px 2px 0 #000; font-family:var(--font-pixel-zh); }
         .form-container-sub { text-align:center; font-size:0.75rem; color:#bbb; letter-spacing:1px; margin-bottom:2rem; font-family:var(--font-pixel-zh); }
+        /* 温馨提示框 */
+.pixel-alert {
+    background: #1a2a3a;
+    border: 3px solid #1a1a1a;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.8rem;
+    text-align: left;
+}
+
+.pixel-alert-title {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #ffd700;
+    letter-spacing: 1px;
+    margin-bottom: 0.6rem;
+    text-shadow: 1px 1px 0 #000;
+}
+
+.pixel-alert-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.pixel-alert-list li {
+    font-size: 0.75rem;
+    color: #ccc;
+    letter-spacing: 0.5px;
+    line-height: 1.6;
+    padding-left: 1.2rem;
+    position: relative;
+    margin-bottom: 0.3rem;
+}
+
+.pixel-alert-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0.2rem;
+    color: #ffd700;
+    font-weight: bold;
+}
         .form-group { margin-bottom:1.6rem; position:relative; }
         .form-label { display:block; font-size:0.85rem; font-weight:bold; letter-spacing:1px; color:#ddd; margin-bottom:0.5rem; text-shadow:1px 1px 0 #000; font-family:var(--font-pixel-zh); }
         .required-star { color:#e05a5a; font-size:1rem; }
@@ -151,6 +193,16 @@
 
         <div class="form-container">
             <h2 class="form-container-title">📋 入驻申请表</h2>
+            <!-- 温馨提示 -->
+<div class="pixel-alert">
+    <div class="pixel-alert-title">📢 温馨提示</div>
+    <ul class="pixel-alert-list">
+        <li>同一邮箱只可报名一次，报名后不可修改，请谨慎填写</li>
+        <li>如果实在需要修改，请联系物业中心客服</li>
+        <li>审核通过后，我们将以邮件形式通知您，请保证邮箱真实有效</li>
+        <li>物业中心客服QQ：2437506568</li>
+    </ul>
+</div>
             <p class="form-container-sub">请如实填写以下信息，审核结果将通过邮箱通知</p>
 
             <form id="applyForm" novalidate>
