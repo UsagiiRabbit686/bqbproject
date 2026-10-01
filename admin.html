@@ -453,8 +453,8 @@ try {
             await renderAdminTable();
 
             if (emailStatus !== 'sent') {
-                alert('审核已通过，但邮件发送失败，请检查 EmailJS 配置');
-            }
+    alert('审核已通过，但邮件发送失败，请检查邮件服务配置。');
+}
         };
 
         window.rejectRecord = async function(id) {
