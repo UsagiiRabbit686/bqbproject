@@ -197,16 +197,22 @@
 
         <div class="form-container">
             <h2 class="form-container-title">📋 入驻申请表</h2>
-            <!-- 温馨提示 -->
-<div class="pixel-alert">
-    <div class="pixel-alert-title">【比奇堡物业中心规则怪谈】</div>
-    <ul class="pixel-alert-list">
-        <li>同一邮箱只可报名一次，报名后不可修改，请谨慎填写</li>
-        <li>如果实在需要修改，请联系物业中心客服</li>
-        <li>审核通过后，我们将以邮件形式通知您，由于邮件易被识别为广告，请注意收件箱中的垃圾邮件</li>
-        <li>物业中心客服QQ：2437506568</li>
-    </ul>
-</div>
+                <!-- 温馨提示弹窗 (初始带有 show 类，打开页面直接显示) -->
+    <div class="pixel-modal-overlay show" id="noticeModal">
+        <div class="pixel-modal" style="text-align:left; max-width: 500px;">
+            <h3 class="pixel-modal-title" style="text-align:center;">【比奇堡物业中心规则怪谈】</h3>
+            <ul class="pixel-alert-list" style="margin-bottom: 1.5rem;">
+                <li>同一邮箱只可报名一次，报名后不可修改，请谨慎填写</li>
+                <li>如果实在需要修改，请联系物业中心客服</li>
+                <li>审核通过后，我们将以邮件形式通知您，由于邮件易被识别为广告，请注意收件箱中的垃圾邮件</li>
+                <li>物业中心客服QQ：2437506568</li>
+            </ul>
+            <div style="text-align:center;">
+                <!-- 初始状态为禁用，显示倒计时 -->
+                <button class="pixel-btn" id="closeNoticeBtn" disabled>请仔细阅读 (10s)</button>
+            </div>
+        </div>
+    </div>
             <p class="form-container-sub">请如实填写以下信息，审核结果将通过邮箱通知</p>
 
             <form id="applyForm" novalidate>
@@ -299,6 +305,8 @@
                         .from('registration-images')
                         .getPublicUrl(fileName);
                 return urlData.publicUrl;
+
+                
             }
 
             
@@ -455,6 +463,33 @@
             // 关闭弹窗（点击遮罩关闭）
             document.getElementById('successModal').addEventListener('click', function(e) {
                 if (e.target === this) this.classList.remove('show');
+            });
+                    // ==========================================
+            // 温馨提示弹窗 10秒倒计时逻辑
+            // ==========================================
+            let noticeCountdown = 10;
+            const closeNoticeBtn = document.getElementById('closeNoticeBtn');
+            const noticeModal = document.getElementById('noticeModal');
+
+            // 设置定时器，每秒执行一次
+            const noticeTimer = setInterval(() => {
+                noticeCountdown--;
+                
+                if (noticeCountdown > 0) {
+                    // 更新按钮上的文字
+                    closeNoticeBtn.textContent = `请仔细阅读 (${noticeCountdown}s)`;
+                } else {
+                    // 倒计时结束
+                    clearInterval(noticeTimer);
+                    closeNoticeBtn.disabled = false; // 解锁按钮
+                    closeNoticeBtn.textContent = '我知道了，去填写';
+                    closeNoticeBtn.style.backgroundColor = 'var(--pixel-green)'; // 变绿提示可点击
+                }
+            }, 1000);
+
+            // 按钮点击事件：关闭弹窗
+            closeNoticeBtn.addEventListener('click', () => {
+                noticeModal.classList.remove('show');
             });
         })();
     </script>
