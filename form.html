@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>比奇堡小区二期入驻申请 - 提交表单</title>
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/site.webmanifest">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DotGothic16&display=swap" rel="stylesheet">
@@ -75,48 +75,30 @@
         }
         .form-container-title { text-align:center; font-size:1.4rem; font-weight:bold; color:#ffd700; letter-spacing:3px; margin-bottom:0.5rem; text-shadow:2px 2px 0 #000; font-family:var(--font-pixel-zh); }
         .form-container-sub { text-align:center; font-size:0.75rem; color:#bbb; letter-spacing:1px; margin-bottom:2rem; font-family:var(--font-pixel-zh); }
-        /* 温馨提示框 */
-.pixel-alert {
-    background: #1a2a3a;
-    border: 3px solid #1a1a1a;
-    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
-    padding: 1rem 1.2rem;
-    margin-bottom: 1.8rem;
-    text-align: left;
-}
-
-.pixel-alert-title {
-    font-size: 0.9rem;
-    font-weight: bold;
-    color: #ffd700;
-    letter-spacing: 1px;
-    margin-bottom: 0.6rem;
-    text-shadow: 1px 1px 0 #000;
-}
-
-.pixel-alert-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.pixel-alert-list li {
-    font-size: 0.75rem;
-    color: #ccc;
-    letter-spacing: 0.5px;
-    line-height: 1.6;
-    padding-left: 1.2rem;
-    position: relative;
-    margin-bottom: 0.3rem;
-}
-
-.pixel-alert-list li::before {
-    content: '•';
-    position: absolute;
-    left: 0.2rem;
-    color: #ffd700;
-    font-weight: bold;
-}
+        
+        /* 温馨提示框列表样式 */
+        .pixel-alert-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .pixel-alert-list li {
+            font-size: 0.75rem;
+            color: #ccc;
+            letter-spacing: 0.5px;
+            line-height: 1.6;
+            padding-left: 1.2rem;
+            position: relative;
+            margin-bottom: 0.3rem;
+        }
+        .pixel-alert-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0.2rem;
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
         .form-group { margin-bottom:1.6rem; position:relative; }
         .form-label { display:block; font-size:0.85rem; font-weight:bold; letter-spacing:1px; color:#ddd; margin-bottom:0.5rem; text-shadow:1px 1px 0 #000; font-family:var(--font-pixel-zh); }
         .required-star { color:#e05a5a; font-size:1rem; }
@@ -171,6 +153,8 @@
         .submit-btn:hover { background:var(--pixel-green-dark); box-shadow:3px 3px 0 rgba(0,0,0,0.4); transform:translate(2px,2px); }
         .submit-btn:active { box-shadow:1px 1px 0 rgba(0,0,0,0.4); transform:translate(4px,4px); }
         .submit-btn:disabled { background:#555; cursor:not-allowed; box-shadow:2px 2px 0 #333; transform:none; }
+        
+        /* 弹窗样式 */
         .pixel-modal-overlay {
             position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:100; display:none; align-items:center; justify-content:center;
         }
@@ -197,24 +181,25 @@
 
         <div class="form-container">
             <h2 class="form-container-title">📋 入驻申请表</h2>
-                <!-- 温馨提示弹窗 (初始带有 show 类，打开页面直接显示) -->
-    <div class="pixel-modal-overlay show" id="noticeModal">
-        <div class="pixel-modal" style="text-align:left; max-width: 500px;">
-            <h3 class="pixel-modal-title" style="text-align:center;">⚠️【比奇堡物业中心规则怪谈】⚠️</h3>
-            <ul class="pixel-alert-list" style="margin-bottom: 1.5rem;">
-                <li>比奇堡小区二期建筑规模为<span style="color: #e05a5a; font-weight: bold;">11×11×11</span>，超过规定大小的建筑<span style="color: #e05a5a; font-weight: bold;">需要额外申请</span></li>
-                <li>入驻业主需要<span style="color: #e05a5a; font-weight: bold;">在一场直播（约四小时）内完成</span>建筑，包括外观与内饰，在时间不足的情况下，<span style="color: #e05a5a; font-weight: bold;">请优先考虑外观</span></li>
-                <li>同一邮箱<span style="color: #e05a5a; font-weight: bold;">只可报名一次</span>，报名后<span style="color: #e05a5a; font-weight: bold;">不可修改</span>，请谨慎填写</li>
-                <li>如果实在需要修改，请联系物业中心客服</li>
-                <li>审核通过后，我们将以邮件形式通知您，由于邮件易被识别为广告，<span style="color: #e05a5a; font-weight: bold;">请注意收件箱中的垃圾邮件</span></li>
-                <li>物业中心客服QQ：2437506568</li>
-            </ul>
-            <div style="text-align:center;">
-                <!-- 初始状态为禁用，显示倒计时 -->
-                <button class="pixel-btn" id="closeNoticeBtn" disabled>请仔细阅读 (10s)</button>
+            
+            <!-- 温馨提示弹窗 (初始带有 show 类，打开页面直接显示) -->
+            <div class="pixel-modal-overlay show" id="noticeModal">
+                <div class="pixel-modal" style="text-align:left; max-width: 500px;">
+                    <h3 class="pixel-modal-title" style="text-align:center;">⚠️【比奇堡物业中心规则怪谈】⚠️</h3>
+                    <ul class="pixel-alert-list" style="margin-bottom: 1.5rem;">
+                        <li>比奇堡小区二期建筑规模为<span style="color: #e05a5a; font-weight: bold;">11×11×11</span>，超过规定大小的建筑<span style="color: #e05a5a; font-weight: bold;">需要额外申请</span></li>
+                        <li>入驻业主需要<span style="color: #e05a5a; font-weight: bold;">在一场直播（约四小时）内完成</span>建筑，包括外观与内饰，在时间不足的情况下，<span style="color: #e05a5a; font-weight: bold;">请优先考虑外观</span></li>
+                        <li>同一邮箱<span style="color: #e05a5a; font-weight: bold;">只可报名一次</span>，报名后<span style="color: #e05a5a; font-weight: bold;">不可修改</span>，请谨慎填写</li>
+                        <li>如果实在需要修改，请联系物业中心客服</li>
+                        <li>审核通过后，我们将以邮件形式通知您，由于邮件易被识别为广告，<span style="color: #e05a5a; font-weight: bold;">请注意收件箱中的垃圾邮件</span></li>
+                        <li>物业中心客服QQ：2437506568</li>
+                    </ul>
+                    <div style="text-align:center;">
+                        <button class="pixel-btn" id="closeNoticeBtn" disabled>请仔细阅读 (10s)</button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
+
             <p class="form-container-sub">请如实填写以下信息，审核结果将通过邮箱通知</p>
 
             <form id="applyForm" novalidate>
@@ -284,54 +269,54 @@
         (function() {
             const supabaseUrl = 'https://nuozfdovyvkvjfflhziy.supabase.co';
             const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51b3pmZG92eXZrdmpmZmxoeml5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMDY1MjIsImV4cCI6MjEwNTg4MjUyMn0.e3qhoBg_ZPs4p5aTnPHXHP44Mc3iqG9liG-fFY2eLmQ';
+            
+            // 修复点：这里是英文逗号，末尾是 }); 而不是 }));
             const supabase = window.supabase.createClient(supabaseUrl, supabaseKey, {
-    auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-        detectSessionInUrl: false
-    }
-}));
+                auth: {
+                    persistSession: false,
+                    autoRefreshToken: false,
+                    detectSessionInUrl: false
+                }
+            });
+
             const STORAGE_KEY = 'bikini_bottom_registrations';
-            let uploadedFile = null;        // 保存 File 对象，而不是 base64 数据
-            let uploadedFileUrl = null;     // 上传成功后返回的公开URL
+            let uploadedFile = null;
+            let uploadedFileUrl = null;
 
             async function uploadImage(file) {
-                // 生成唯一文件名，避免重名覆盖
                 const fileName = 'reg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '.png';
                 
                 const { data, error } = await supabase.storage
-                    .from('registration-images')   // 你的 Storage 桶名称
-                .upload(fileName, file, {
-                    contentType: 'image/png',
-                    upsert: false
-                });
+                    .from('registration-images')
+                    .upload(fileName, file, {
+                        contentType: 'image/png',
+                        upsert: false
+                    });
+                    
                 if (error) {
                     throw new Error('图片上传失败：' + error.message);
                 }
-                // 获取公开URL
-                    const { data: urlData } = supabase.storage
-                        .from('registration-images')
-                        .getPublicUrl(fileName);
-                return urlData.publicUrl;
-
                 
+                const { data: urlData } = supabase.storage
+                    .from('registration-images')
+                    .getPublicUrl(fileName);
+                    
+                return urlData.publicUrl;
             }
-
-            
 
             // 文件上传
             document.getElementById('btnFileUpload').addEventListener('click', () => document.getElementById('fileInput').click());
             document.getElementById('fileInput').addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (!file) return;
-                // 校验格式
+                
                 if (!file.name.toLowerCase().endsWith('.png') && file.type !== 'image/png') {
                     document.getElementById('err-file').textContent = '仅支持PNG格式图片';
                     document.getElementById('err-file').classList.add('show');
                     this.value = '';
                     return;
                 }
-                // 校验大小
+                
                 if (file.size > 20 * 1024 * 1024) {
                     document.getElementById('err-file').textContent = '图片大小不能超过20MB';
                     document.getElementById('err-file').classList.add('show');
@@ -339,16 +324,15 @@
                     return;
                 }
                 
-                // 保存 File 对象
                 uploadedFile = file;
                 document.getElementById('fileInfo').textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + 'MB)';
                 document.getElementById('err-file').classList.remove('show');
                 
-                // 本地预览（用 URL.createObjectURL，比 base64 更高效）
                 const preview = document.getElementById('filePreview');
                 preview.querySelector('img').src = URL.createObjectURL(file);
                 preview.classList.add('show');
             });
+
             // 复选框样式更新
             function updateCheckboxStyle() {
                 document.querySelectorAll('.pixel-checkbox input[type="checkbox"]').forEach(input => {
@@ -418,10 +402,8 @@
                 submitBtn.textContent = '⏳ 提交中...';
                 
                 try {
-                    // 1. 上传图片到 Supabase Storage
                     const imageUrl = await uploadImage(uploadedFile);
                     
-                    // 2. 插入数据到 Supabase 数据库
                     const { error } = await supabase
                         .from('registrations')
                         .insert([{
@@ -432,6 +414,7 @@
                             img_source: imgSource,
                             image_url: imageUrl
                         }]);
+                        
                     if (error) {
                         if (error.code === '23505') {
                             document.getElementById('err-email').textContent = '该邮箱已报名，请勿重复提交';
@@ -445,7 +428,7 @@
                         return;
                     }
                     
-                    // 3. 提交成功，重置表单
+                    // 提交成功，重置表单
                     document.getElementById('applyForm').reset();
                     uploadedFile = null;
                     uploadedFileUrl = null;
@@ -453,7 +436,7 @@
                     document.getElementById('filePreview').classList.remove('show');
                     document.getElementById('filePreviewImg').src = '';
                     document.getElementById('fileInput').value = '';
-                    document.querySelectorAll('.pixel-checkbox, .pixel-radio').forEach(el => el.classList.remove('checked'))
+                    document.querySelectorAll('.pixel-checkbox, .pixel-radio').forEach(el => el.classList.remove('checked'));
                         
                     submitBtn.disabled = false;
                     submitBtn.textContent = '✉ 提交报名';
@@ -468,37 +451,36 @@
                 }
             });
 
-            // 关闭弹窗（点击遮罩关闭）
+            // 关闭成功弹窗（点击遮罩关闭）
             document.getElementById('successModal').addEventListener('click', function(e) {
                 if (e.target === this) this.classList.remove('show');
             });
-                    // ==========================================
+
+            // ==========================================
             // 温馨提示弹窗 10秒倒计时逻辑
             // ==========================================
             let noticeCountdown = 10;
             const closeNoticeBtn = document.getElementById('closeNoticeBtn');
             const noticeModal = document.getElementById('noticeModal');
 
-            // 设置定时器，每秒执行一次
             const noticeTimer = setInterval(() => {
                 noticeCountdown--;
                 
                 if (noticeCountdown > 0) {
-                    // 更新按钮上的文字
                     closeNoticeBtn.textContent = `请仔细阅读 (${noticeCountdown}s)`;
                 } else {
-                    // 倒计时结束
                     clearInterval(noticeTimer);
-                    closeNoticeBtn.disabled = false; // 解锁按钮
+                    closeNoticeBtn.disabled = false;
                     closeNoticeBtn.textContent = '我知道了，去填写';
-                    closeNoticeBtn.style.backgroundColor = 'var(--pixel-green)'; // 变绿提示可点击
+                    closeNoticeBtn.style.backgroundColor = 'var(--pixel-green)';
                 }
             }, 1000);
 
-            // 按钮点击事件：关闭弹窗
+            // 按钮点击事件：关闭提示弹窗
             closeNoticeBtn.addEventListener('click', () => {
                 noticeModal.classList.remove('show');
             });
+
         })();
     </script>
 </body>
