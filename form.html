@@ -270,12 +270,17 @@
             const supabaseUrl = 'https://nuozfdovyvkvjfflhziy.supabase.co';
             const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51b3pmZG92eXZrdmpmZmxoeml5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMDY1MjIsImV4cCI6MjEwNTg4MjUyMn0.e3qhoBg_ZPs4p5aTnPHXHP44Mc3iqG9liG-fFY2eLmQ';
             
-            // 修复点：这里是英文逗号，末尾是 }); 而不是 }));
+            // 【核心修改点】：加入 storage 隔离代码，强制前台忽略本地缓存的管理员登录态
             const supabase = window.supabase.createClient(supabaseUrl, supabaseKey, {
                 auth: {
                     persistSession: false,
                     autoRefreshToken: false,
-                    detectSessionInUrl: false
+                    detectSessionInUrl: false,
+                    storage: { 
+                        getItem: () => null, 
+                        setItem: () => {}, 
+                        removeItem: () => {} 
+                    }
                 }
             });
 
