@@ -132,6 +132,9 @@
             <label>昵称搜索：</label>
             <input type="text" id="searchEmail" placeholder="输入昵称模糊搜索..." oninput="renderAdminTable()">
             <button class="pixel-btn btn-xs btn-blue" onclick="exportCSV()">📊 导出Excel(CSV)</button>
+            <!-- 新增：清理图片按钮 -->
+            <button class="pixel-btn btn-xs btn-red" onclick="cleanRejectedImages()">🗑 清理已拒绝图片</button>
+            
             <span style="margin-left:auto;font-size:0.65rem;color:#888;" id="recordCount">共 0 条记录</span>
         </div>
 
@@ -779,7 +782,72 @@
         };
 
         // ============================================================
-        // 12. 关闭弹窗
+        // 12. 一键清理已拒绝的图片（释放流量）
+        // ============================================================
+        window.cleanRejectedImages = async function() {
+            if (!confirm('⚠️ 确定要清理所有“未通过”表单的图片吗？\n\n此操作将永久删除这些图片文件，但会保留文字报名记录。')) {
+                return;
+            }
+
+            try {
+                // 1. 查出所有状态为 rejected 且有图片的记录
+                const { data: records, error: fetchError } = await supabase
+                    .from('registrations')
+                    .select('id, image_url')
+                    .eq('status', 'rejected')
+                    .not('image_url', 'is', null);
+
+                if (fetchError) throw fetchError;
+                
+                if (!records || records.length === 0) {
+                    alert('当前没有状态为“未通过”且包含图片的记录，无需清理。');
+                    return;
+                }
+
+                // 2. 提取文件名（去掉 URL 前缀）
+                const filePaths = records.map(r => r.image_url.split('/').pop());
+                const idsToUpdate = records.map(r => r.id);
+                
+                // 3. 调用 Storage API 删除文件 (分批处理，每次最多 100 个，防止超限)
+                let successCount = 0;
+                const chunkSize = 100;
+                for (let i = 0; i < filePaths.length; i += chunkSize) {
+                    const chunk = filePaths.slice(i, i + chunkSize);
+                    const { error: removeError } = await supabase
+                        .storage
+                        .from('registration-images')
+                        .remove(chunk);
+                    
+                    if (!removeError) {
+                        successCount += chunk.length;
+                    } else {
+                        console.error('删除部分文件失败:', removeError);
+                    }
+                }
+
+                // 4. 将数据库中这些记录的 image_url 置空，防止后台显示破图
+                if (idsToUpdate.length > 0) {
+                    // 同样分批更新，防止单次请求过大
+                    for (let i = 0; i < idsToUpdate.length; i += chunkSize) {
+                        const idsChunk = idsToUpdate.slice(i, i + chunkSize);
+                        await supabase
+                            .from('registrations')
+                            .update({ image_url: null })
+                            .in('id', idsChunk);
+                    }
+                }
+
+                alert(`✅ 清理完成！\n成功删除了 ${successCount} 张废弃图片，表单记录已保留。`);
+                await renderAdminTable(); // 刷新表格
+
+            } catch (err) {
+                console.error('清理失败:', err);
+                alert('清理失败：' + err.message);
+            }
+        };
+
+        // ============================================================
+        // 13. 关闭弹窗
         // ============================================================
         document.querySelectorAll('.pixel-modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', function(e) {
