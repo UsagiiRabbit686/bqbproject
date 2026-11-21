@@ -12,6 +12,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DotGothic16&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 引入图片压缩库 -->
+    <script src="https://cdn.jsdelivr.net/npm/compressorjs@1.2.1/dist/compressor.min.js"></script>
     <style>
         :root {
             --pixel-black: #1a1a1a; --pixel-dark: #2d2d2d; --pixel-gray: #6b6b6b;
@@ -182,7 +184,7 @@
         <div class="form-container">
             <h2 class="form-container-title">📋 入驻申请表</h2>
             
-            <!-- 温馨提示弹窗 (初始带有 show 类，打开页面直接显示) -->
+            <!-- 温馨提示弹窗 -->
             <div class="pixel-modal-overlay show" id="noticeModal">
                 <div class="pixel-modal" style="text-align:left; max-width: 500px;">
                     <h3 class="pixel-modal-title" style="text-align:center;">⚠️【比奇堡物业中心规则怪谈】⚠️</h3>
@@ -240,14 +242,15 @@
                     <label class="form-label">上传你要在比奇堡小区二期内建造的建筑图片 <span class="required-star">*</span></label>
                     <div class="pixel-file-upload">
                         <button type="button" class="pixel-file-btn" id="btnFileUpload">📁 选择图片</button>
-                        <input type="file" id="fileInput" accept=".png,image/png" style="display:none;">
+                        <!-- 去掉了只能选png的限制，支持所有图片 -->
+                        <input type="file" id="fileInput" accept="image/*" style="display:none;">
                         <span class="file-info" id="fileInfo">未选择文件</span>
                     </div>
                     <div class="file-preview" id="filePreview">
                         <img id="filePreviewImg" src="" alt="预览图片">
                     </div>
-                    <span class="file-req-hint">仅支持PNG格式，大小不超过20MB</span>
-                    <span class="error-msg" id="err-file">请上传PNG格式图片（≤20MB）</span>
+                    <span class="file-req-hint">支持常见图片格式，系统将自动压缩减小体积</span>
+                    <span class="error-msg" id="err-file">请上传图片</span>
                 </div>
                 <div class="submit-area">
                     <button type="submit" class="submit-btn" id="submitBtn">✉ 提交报名</button>
@@ -270,7 +273,6 @@
             const supabaseUrl = 'https://nuozfdovyvkvjfflhziy.supabase.co';
             const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51b3pmZG92eXZrdmpmZmxoeml5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMDY1MjIsImV4cCI6MjEwNTg4MjUyMn0.e3qhoBg_ZPs4p5aTnPHXHP44Mc3iqG9liG-fFY2eLmQ';
             
-            // 【核心修改点】：加入 storage 隔离代码，强制前台忽略本地缓存的管理员登录态
             const supabase = window.supabase.createClient(supabaseUrl, supabaseKey, {
                 auth: {
                     persistSession: false,
@@ -284,17 +286,16 @@
                 }
             });
 
-            const STORAGE_KEY = 'bikini_bottom_registrations';
             let uploadedFile = null;
-            let uploadedFileUrl = null;
 
             async function uploadImage(file) {
-                const fileName = 'reg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '.png';
+                const fileExt = file.name.split('.').pop();
+                const fileName = 'reg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6) + '.' + fileExt;
                 
                 const { data, error } = await supabase.storage
                     .from('registration-images')
                     .upload(fileName, file, {
-                        contentType: 'image/png',
+                        contentType: file.type, // 动态获取压缩后的文件格式
                         upsert: false
                     });
                     
@@ -309,33 +310,58 @@
                 return urlData.publicUrl;
             }
 
-            // 文件上传
+            // 文件上传（加入压缩逻辑）
             document.getElementById('btnFileUpload').addEventListener('click', () => document.getElementById('fileInput').click());
             document.getElementById('fileInput').addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (!file) return;
                 
-                if (!file.name.toLowerCase().endsWith('.png') && file.type !== 'image/png') {
-                    document.getElementById('err-file').textContent = '仅支持PNG格式图片';
+                if (!file.type.startsWith('image/')) {
+                    document.getElementById('err-file').textContent = '请选择图片文件';
                     document.getElementById('err-file').classList.add('show');
                     this.value = '';
                     return;
                 }
                 
                 if (file.size > 20 * 1024 * 1024) {
-                    document.getElementById('err-file').textContent = '图片大小不能超过20MB';
+                    document.getElementById('err-file').textContent = '原图大小不能超过20MB';
                     document.getElementById('err-file').classList.add('show');
                     this.value = '';
                     return;
                 }
                 
-                uploadedFile = file;
-                document.getElementById('fileInfo').textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + 'MB)';
-                document.getElementById('err-file').classList.remove('show');
-                
-                const preview = document.getElementById('filePreview');
-                preview.querySelector('img').src = URL.createObjectURL(file);
-                preview.classList.add('show');
+                // 显示“正在压缩”提示
+                document.getElementById('fileInfo').textContent = '正在压缩图片，请稍候...';
+
+                // 使用 compressorjs 压缩
+                new Compressor(file, {
+                    quality: 0.6, // 压缩质量 (0-1)
+                    maxWidth: 1920,
+                    maxHeight: 1080,
+                    mimeType: 'image/jpeg', // 强制转换为 jpeg 减小体积
+                    success(result) {
+                        const compressedFile = new File([result], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                            type: 'image/jpeg',
+                            lastModified: Date.now(),
+                        });
+
+                        uploadedFile = compressedFile;
+                        document.getElementById('fileInfo').textContent = compressedFile.name + ' (已压缩: ' + (compressedFile.size / 1024).toFixed(0) + 'KB)';
+                        document.getElementById('err-file').classList.remove('show');
+                        
+                        const preview = document.getElementById('filePreview');
+                        preview.querySelector('img').src = URL.createObjectURL(compressedFile);
+                        preview.classList.add('show');
+                    },
+                    error(err) {
+                        console.error('压缩失败，使用原图', err);
+                        uploadedFile = file;
+                        document.getElementById('fileInfo').textContent = file.name + ' (' + (file.size / 1024 / 1024).toFixed(2) + 'MB)';
+                        const preview = document.getElementById('filePreview');
+                        preview.querySelector('img').src = URL.createObjectURL(file);
+                        preview.classList.add('show');
+                    },
+                });
             });
 
             // 复选框样式更新
@@ -376,7 +402,7 @@
                     document.getElementById('err-imgSource').classList.add('show'); isValid = false;
                 }
                 if (!uploadedFile) {
-                    document.getElementById('err-file').textContent = '请上传PNG格式图片';
+                    document.getElementById('err-file').textContent = '请上传图片';
                     document.getElementById('err-file').classList.add('show'); isValid = false;
                 }
                 return isValid;
@@ -433,10 +459,8 @@
                         return;
                     }
                     
-                    // 提交成功，重置表单
                     document.getElementById('applyForm').reset();
                     uploadedFile = null;
-                    uploadedFileUrl = null;
                     document.getElementById('fileInfo').textContent = '未选择文件';
                     document.getElementById('filePreview').classList.remove('show');
                     document.getElementById('filePreviewImg').src = '';
@@ -446,7 +470,6 @@
                     submitBtn.disabled = false;
                     submitBtn.textContent = '✉ 提交报名';
                     
-                    // 显示成功弹窗
                     document.getElementById('successModal').classList.add('show');
                 } catch (err) {
                     console.error(err);
@@ -456,14 +479,12 @@
                 }
             });
 
-            // 关闭成功弹窗（点击遮罩关闭）
+            // 关闭成功弹窗
             document.getElementById('successModal').addEventListener('click', function(e) {
                 if (e.target === this) this.classList.remove('show');
             });
 
-            // ==========================================
             // 温馨提示弹窗 10秒倒计时逻辑
-            // ==========================================
             let noticeCountdown = 10;
             const closeNoticeBtn = document.getElementById('closeNoticeBtn');
             const noticeModal = document.getElementById('noticeModal');
@@ -481,7 +502,6 @@
                 }
             }, 1000);
 
-            // 按钮点击事件：关闭提示弹窗
             closeNoticeBtn.addEventListener('click', () => {
                 noticeModal.classList.remove('show');
             });
